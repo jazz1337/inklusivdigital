@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      (function(l) {
+        if (l.search[1] === '/') {
+          var decoded = l.search.slice(1).split('&').map(function(s) {
+            return s.replace(/~and~/g, '&');
+          }).join('?');
+          window.history.replaceState(null, null, l.pathname.slice(0, -1) + decoded + l.hash);
+        }
+      }(window.location));
+    </script>
+    <title>BFSG.Agentur – Barrierefreie Websites & Onlineshops</title>
+    <meta
+      name="description"
+      content="Wir machen deine Website BFSG-konform: Audit, Umsetzung und laufende Betreuung. Pragmatisch, rechtssicher, ohne Floskeln."
+    />
+    <meta name="author" content="BFSG.Agentur" />
+    <meta property="og:title" content="BFSG.Agentur – Barrierefreie Websites & Onlineshops" />
+    <meta property="og:description" content="Audit, Umsetzung und laufende Betreuung für BFSG-Konformität." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap"
+    />
+    <script type="module" crossorigin src="/inklusivdigital/assets/index-9T1bRaIW.js"></script>
+    <link rel="stylesheet" crossorigin href="/inklusivdigital/assets/index-jl6CjHeA.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
