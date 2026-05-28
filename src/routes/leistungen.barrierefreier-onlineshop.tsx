@@ -17,13 +17,13 @@ import { CTAButton } from "@/components/site/CTAButton";
 export const Route = createFileRoute("/leistungen/barrierefreier-onlineshop")({
   head: () => ({
     meta: [
-      { title: "Barrierefreier Onlineshop – BFSG.Agentur" },
+      { title: "Barrierefreier Onlineshop – InklusivDigital" },
       {
         name: "description",
         content:
           "Onlineshops müssen seit 28.06.2025 barrierefrei sein. Wir machen Shopify, WooCommerce, Magento und Custom-Lösungen BFSG-konform.",
       },
-      { property: "og:title", content: "Barrierefreier Onlineshop – BFSG.Agentur" },
+      { property: "og:title", content: "Barrierefreier Onlineshop – InklusivDigital" },
       { property: "og:description", content: "Rechtssicher verkaufen, mehr Kunden erreichen." },
     ],
   }),

@@ -8,13 +8,13 @@ import { PageSpeedScanner } from "@/components/site/PageSpeedScanner";
 export const Route = createFileRoute("/wissen/bin-ich-betroffen")({
   head: () => ({
     meta: [
-      { title: "Bin ich vom BFSG betroffen? – BFSG.Agentur" },
+      { title: "Bin ich vom BFSG betroffen? – InklusivDigital" },
       {
         name: "description",
         content:
           "Schnelle Einordnung: Bist du vom Barrierefreiheitsstärkungsgesetz betroffen? Faustregel, Beispiele und Schnelltest.",
       },
-      { property: "og:title", content: "Bin ich vom BFSG betroffen? – BFSG.Agentur" },
+      { property: "og:title", content: "Bin ich vom BFSG betroffen? – InklusivDigital" },
       { property: "og:description", content: "B2C, B2B, Kontaktformular: Wer muss handeln?" },
     ],
   }),

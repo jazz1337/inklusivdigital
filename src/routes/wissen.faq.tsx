@@ -8,7 +8,7 @@ import { CTAButton } from "@/components/site/CTAButton";
 export const Route = createFileRoute("/wissen/faq")({
   head: () => ({
     meta: [
-      { title: "FAQ – Häufige Fragen zum BFSG | BFSG.Agentur" },
+      { title: "FAQ – Häufige Fragen zum BFSG | InklusivDigital" },
       {
         name: "description",
         content:

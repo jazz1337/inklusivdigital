@@ -7,13 +7,13 @@ import { CTAButton } from "@/components/site/CTAButton";
 export const Route = createFileRoute("/ueber-uns")({
   head: () => ({
     meta: [
-      { title: "Über uns – BFSG.Agentur" },
+      { title: "Über uns – InklusivDigital" },
       {
         name: "description",
         content:
           "Wir machen das Netz für alle zugänglich. Pragmatisch, technisch fundiert und ohne Floskeln. Lerne unsere Werte und Arbeitsweise kennen.",
       },
-      { property: "og:title", content: "Über uns – BFSG.Agentur" },
+      { property: "og:title", content: "Über uns – InklusivDigital" },
       { property: "og:description", content: "Wer wir sind und wie wir arbeiten." },
     ],
   }),
@@ -61,6 +61,27 @@ function UeberUnsPage() {
       </Section>
 
       <Section>
+        <SectionHeading eyebrow="Das Team" title="Menschen hinter InklusivDigital." align="center" />
+        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <TeamCard
+            name="Jan Hoffmann"
+            role="Gründer & Lead Accessibility Engineer"
+            bio="Über 10 Jahre Webentwicklung, seit 2018 auf WCAG und digitale Barrierefreiheit spezialisiert."
+          />
+          <TeamCard
+            name="Sara Krüger"
+            role="UX & Accessibility Designerin"
+            bio="Nutzerzentriertes Design trifft auf gesetzliche Anforderungen – sie verbindet beides ohne Kompromisse."
+          />
+          <TeamCard
+            name="Tobias Meier"
+            role="Legal & Compliance"
+            bio="Juristischer Hintergrund mit Fokus auf BFSG, WCAG und E-Commerce-Recht. Klare Antworten, kein Fachjargon."
+          />
+        </div>
+      </Section>
+
+      <Section>
         <SectionHeading eyebrow="Wie wir arbeiten" title="Dein verlängerter Arm in Sachen Barrierefreiheit." />
         <p className="mt-6 max-w-3xl text-lg text-muted-foreground">
           Wir sind schnell, direkt erreichbar und konzentrieren uns auf das Wesentliche. Bei uns zählt das Ergebnis:
@@ -71,5 +92,24 @@ function UeberUnsPage() {
         </div>
       </Section>
     </>
+  );
+}
+
+function TeamCard({
+  name,
+  role,
+  bio,
+}: {
+  name: string;
+  role: string;
+  bio: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-border bg-card p-6">
+      <div className="mb-4 h-16 w-16 rounded-2xl bg-primary/10" aria-hidden />
+      <h3 className="font-display text-lg font-bold text-foreground">{name}</h3>
+      <p className="mt-1 text-sm font-medium text-primary">{role}</p>
+      <p className="mt-3 text-sm text-muted-foreground">{bio}</p>
+    </div>
   );
 }

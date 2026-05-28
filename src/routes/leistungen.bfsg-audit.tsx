@@ -22,13 +22,13 @@ import { PageSpeedScanner } from "@/components/site/PageSpeedScanner";
 export const Route = createFileRoute("/leistungen/bfsg-audit")({
   head: () => ({
     meta: [
-      { title: "BFSG-Audit & Analyse – BFSG.Agentur" },
+      { title: "BFSG-Audit & Analyse – InklusivDigital" },
       {
         name: "description",
         content:
           "Vollständiges BFSG-Audit deiner Website: automatisierte und manuelle Prüfung, priorisierter Maßnahmenplan, WCAG 2.1 Konformitätsbewertung.",
       },
-      { property: "og:title", content: "BFSG-Audit & Analyse – BFSG.Agentur" },
+      { property: "og:title", content: "BFSG-Audit & Analyse – InklusivDigital" },
       { property: "og:description", content: "Klarheit über deine Barrieren – mit konkretem Maßnahmenplan." },
     ],
   }),

@@ -7,7 +7,7 @@ import { PageSpeedScanner } from "@/components/site/PageSpeedScanner";
 export const Route = createFileRoute("/bfsg-check")({
   head: () => ({
     meta: [
-      { title: "Kostenloser BFSG-Check – BFSG.Agentur" },
+      { title: "Kostenloser BFSG-Check – InklusivDigital" },
       {
         name: "description",
         content:

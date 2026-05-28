@@ -7,13 +7,13 @@ import { CTAButton } from "@/components/site/CTAButton";
 export const Route = createFileRoute("/leistungen/betreuung")({
   head: () => ({
     meta: [
-      { title: "Laufende Betreuung – BFSG.Agentur" },
+      { title: "Laufende Betreuung – InklusivDigital" },
       {
         name: "description",
         content:
           "Barrierefreiheit ist ein Prozess, kein Projekt. Wir kümmern uns um regelmäßige Checks, Re-Audits, Beratung und Monitoring.",
       },
-      { property: "og:title", content: "Laufende Betreuung – BFSG.Agentur" },
+      { property: "og:title", content: "Laufende Betreuung – InklusivDigital" },
       { property: "og:description", content: "Sorgenfrei barrierefrei – dauerhaft konform bleiben." },
     ],
   }),
