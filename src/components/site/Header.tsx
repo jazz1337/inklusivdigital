@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { ChevronDown, Menu, X, ShieldCheck } from "lucide-react";
+import { ChevronDown, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type DropdownItem = { to: string; label: string; description?: string };
@@ -60,11 +60,12 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/85 backdrop-blur-md">
       <a href="#main" className="skip-link">Zum Inhalt springen</a>
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-6">
-        <Link to="/" className="flex items-center gap-2 font-display font-bold text-lg" aria-label="Startseite">
-          <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">
-            <ShieldCheck className="h-5 w-5" aria-hidden />
-          </span>
-          <span>BFSG<span className="text-primary">.</span>Agentur</span>
+        <Link to="/" aria-label="InklusivDigital – Startseite">
+          <img
+            src={`${import.meta.env.BASE_URL}logo.png`}
+            alt="InklusivDigital"
+            className="h-9 w-auto"
+          />
         </Link>
 
         {/* Desktop nav */}

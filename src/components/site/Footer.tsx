@@ -1,5 +1,4 @@
 import { Link } from "@tanstack/react-router";
-import { ShieldCheck } from "lucide-react";
 
 export function Footer() {
   return (
@@ -7,11 +6,12 @@ export function Footer() {
       <div className="mx-auto max-w-7xl px-4 py-12 md:px-6">
         <div className="grid gap-10 md:grid-cols-4">
           <div>
-            <Link to="/" className="flex items-center gap-2 font-display text-lg font-bold">
-              <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">
-                <ShieldCheck className="h-5 w-5" aria-hidden />
-              </span>
-              BFSG<span className="text-primary">.</span>Agentur
+            <Link to="/" aria-label="InklusivDigital – Startseite">
+              <img
+                src={`${import.meta.env.BASE_URL}logo.png`}
+                alt="InklusivDigital"
+                className="h-8 w-auto"
+              />
             </Link>
             <p className="mt-4 text-sm text-muted-foreground max-w-xs">
               Wir machen das Netz für alle zugänglich – pragmatisch, rechtssicher, ohne Floskeln.
