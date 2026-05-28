@@ -25,7 +25,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 const WEBHOOK_URL =
-  "https://n8n.jazzsleeps.org/webhook-test/4ead0250-670f-4039-982a-06a7dac14421";
+  "https://n8n.jazzsleeps.org/webhook/4ead0250-670f-4039-982a-06a7dac14421";
 
 const schema = z.object({
   firmenname: z.string().min(1, "Pflichtfeld"),
