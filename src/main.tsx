@@ -8,6 +8,7 @@ const router = createRouter({
   routeTree,
   defaultPreload: "intent",
   scrollRestoration: true,
+  basepath: "/inklusivdigital",
 });
 
 declare module "@tanstack/react-router" {
