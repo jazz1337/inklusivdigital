@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as KontaktRouteImport } from './routes/kontakt'
 import { Route as UeberUnsRouteImport } from './routes/ueber-uns'
 import { Route as BfsgCheckRouteImport } from './routes/bfsg-check'
 import { Route as IndexRouteImport } from './routes/index'
@@ -19,6 +20,11 @@ import { Route as LeistungenBfsgAuditRouteImport } from './routes/leistungen.bfs
 import { Route as LeistungenBetreuungRouteImport } from './routes/leistungen.betreuung'
 import { Route as LeistungenBarrierefreierOnlineshopRouteImport } from './routes/leistungen.barrierefreier-onlineshop'
 
+const KontaktRoute = KontaktRouteImport.update({
+  id: '/kontakt',
+  path: '/kontakt',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UeberUnsRoute = UeberUnsRouteImport.update({
   id: '/ueber-uns',
   path: '/ueber-uns',
@@ -69,6 +75,7 @@ const LeistungenBarrierefreierOnlineshopRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/bfsg-check': typeof BfsgCheckRoute
+  '/kontakt': typeof KontaktRoute
   '/ueber-uns': typeof UeberUnsRoute
   '/leistungen/barrierefreier-onlineshop': typeof LeistungenBarrierefreierOnlineshopRoute
   '/leistungen/betreuung': typeof LeistungenBetreuungRoute
@@ -80,6 +87,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/bfsg-check': typeof BfsgCheckRoute
+  '/kontakt': typeof KontaktRoute
   '/ueber-uns': typeof UeberUnsRoute
   '/leistungen/barrierefreier-onlineshop': typeof LeistungenBarrierefreierOnlineshopRoute
   '/leistungen/betreuung': typeof LeistungenBetreuungRoute
@@ -92,6 +100,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/bfsg-check': typeof BfsgCheckRoute
+  '/kontakt': typeof KontaktRoute
   '/ueber-uns': typeof UeberUnsRoute
   '/leistungen/barrierefreier-onlineshop': typeof LeistungenBarrierefreierOnlineshopRoute
   '/leistungen/betreuung': typeof LeistungenBetreuungRoute
@@ -105,6 +114,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/bfsg-check'
+    | '/kontakt'
     | '/ueber-uns'
     | '/leistungen/barrierefreier-onlineshop'
     | '/leistungen/betreuung'
@@ -116,6 +126,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/bfsg-check'
+    | '/kontakt'
     | '/ueber-uns'
     | '/leistungen/barrierefreier-onlineshop'
     | '/leistungen/betreuung'
@@ -127,6 +138,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/bfsg-check'
+    | '/kontakt'
     | '/ueber-uns'
     | '/leistungen/barrierefreier-onlineshop'
     | '/leistungen/betreuung'
@@ -139,6 +151,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BfsgCheckRoute: typeof BfsgCheckRoute
+  KontaktRoute: typeof KontaktRoute
   UeberUnsRoute: typeof UeberUnsRoute
   LeistungenBarrierefreierOnlineshopRoute: typeof LeistungenBarrierefreierOnlineshopRoute
   LeistungenBetreuungRoute: typeof LeistungenBetreuungRoute
@@ -162,6 +175,13 @@ declare module '@tanstack/react-router' {
       path: '/bfsg-check'
       fullPath: '/bfsg-check'
       preLoaderRoute: typeof BfsgCheckRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kontakt': {
+      id: '/kontakt'
+      path: '/kontakt'
+      fullPath: '/kontakt'
+      preLoaderRoute: typeof KontaktRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -219,6 +239,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BfsgCheckRoute: BfsgCheckRoute,
+  KontaktRoute: KontaktRoute,
   UeberUnsRoute: UeberUnsRoute,
   LeistungenBarrierefreierOnlineshopRoute:
     LeistungenBarrierefreierOnlineshopRoute,
