@@ -8,13 +8,13 @@ import { PageSpeedScanner } from "@/components/site/PageSpeedScanner";
 export const Route = createFileRoute("/wissen/was-ist-bfsg")({
   head: () => ({
     meta: [
-      { title: "Was ist das BFSG? – BFSG.Agentur" },
+      { title: "Was ist das BFSG? – InklusivDigital" },
       {
         name: "description",
         content:
           "Das Barrierefreiheitsstärkungsgesetz erklärt: Hintergründe, Geltungsbereich, WCAG-Prinzipien, Bußgelder und Ausnahmen.",
       },
-      { property: "og:title", content: "Was ist das BFSG? – BFSG.Agentur" },
+      { property: "og:title", content: "Was ist das BFSG? – InklusivDigital" },
       { property: "og:description", content: "Alles Wichtige zum Barrierefreiheitsstärkungsgesetz." },
     ],
   }),

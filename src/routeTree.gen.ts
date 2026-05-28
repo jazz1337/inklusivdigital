@@ -9,25 +9,42 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as KontaktRouteImport } from './routes/kontakt'
 import { Route as UeberUnsRouteImport } from './routes/ueber-uns'
+import { Route as KontaktRouteImport } from './routes/kontakt'
+import { Route as ImpressumRouteImport } from './routes/impressum'
+import { Route as DatenschutzRouteImport } from './routes/datenschutz'
 import { Route as BfsgCheckRouteImport } from './routes/bfsg-check'
+import { Route as BarrierefreiheitserklaerungRouteImport } from './routes/barrierefreiheitserklaerung'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WissenWasIstBfsgRouteImport } from './routes/wissen.was-ist-bfsg'
 import { Route as WissenFaqRouteImport } from './routes/wissen.faq'
 import { Route as WissenBinIchBetroffenRouteImport } from './routes/wissen.bin-ich-betroffen'
+import { Route as RechtWiderrufsbuttonRouteImport } from './routes/recht.widerrufsbutton'
 import { Route as LeistungenBfsgAuditRouteImport } from './routes/leistungen.bfsg-audit'
 import { Route as LeistungenBetreuungRouteImport } from './routes/leistungen.betreuung'
 import { Route as LeistungenBarrierefreierOnlineshopRouteImport } from './routes/leistungen.barrierefreier-onlineshop'
+import { Route as GuidesTastaturNavigationRouteImport } from './routes/guides.tastatur-navigation'
+import { Route as GuidesKontrastRouteImport } from './routes/guides.kontrast'
+import { Route as GuidesAlttexteRouteImport } from './routes/guides.alttexte'
 
+const UeberUnsRoute = UeberUnsRouteImport.update({
+  id: '/ueber-uns',
+  path: '/ueber-uns',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const KontaktRoute = KontaktRouteImport.update({
   id: '/kontakt',
   path: '/kontakt',
   getParentRoute: () => rootRouteImport,
 } as any)
-const UeberUnsRoute = UeberUnsRouteImport.update({
-  id: '/ueber-uns',
-  path: '/ueber-uns',
+const ImpressumRoute = ImpressumRouteImport.update({
+  id: '/impressum',
+  path: '/impressum',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DatenschutzRoute = DatenschutzRouteImport.update({
+  id: '/datenschutz',
+  path: '/datenschutz',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BfsgCheckRoute = BfsgCheckRouteImport.update({
@@ -35,6 +52,12 @@ const BfsgCheckRoute = BfsgCheckRouteImport.update({
   path: '/bfsg-check',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BarrierefreiheitserklaerungRoute =
+  BarrierefreiheitserklaerungRouteImport.update({
+    id: '/barrierefreiheitserklaerung',
+    path: '/barrierefreiheitserklaerung',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -55,6 +78,11 @@ const WissenBinIchBetroffenRoute = WissenBinIchBetroffenRouteImport.update({
   path: '/wissen/bin-ich-betroffen',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RechtWiderrufsbuttonRoute = RechtWiderrufsbuttonRouteImport.update({
+  id: '/recht/widerrufsbutton',
+  path: '/recht/widerrufsbutton',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LeistungenBfsgAuditRoute = LeistungenBfsgAuditRouteImport.update({
   id: '/leistungen/bfsg-audit',
   path: '/leistungen/bfsg-audit',
@@ -71,27 +99,57 @@ const LeistungenBarrierefreierOnlineshopRoute =
     path: '/leistungen/barrierefreier-onlineshop',
     getParentRoute: () => rootRouteImport,
   } as any)
+const GuidesTastaturNavigationRoute =
+  GuidesTastaturNavigationRouteImport.update({
+    id: '/guides/tastatur-navigation',
+    path: '/guides/tastatur-navigation',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const GuidesKontrastRoute = GuidesKontrastRouteImport.update({
+  id: '/guides/kontrast',
+  path: '/guides/kontrast',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuidesAlttexteRoute = GuidesAlttexteRouteImport.update({
+  id: '/guides/alttexte',
+  path: '/guides/alttexte',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/barrierefreiheitserklaerung': typeof BarrierefreiheitserklaerungRoute
   '/bfsg-check': typeof BfsgCheckRoute
+  '/datenschutz': typeof DatenschutzRoute
+  '/impressum': typeof ImpressumRoute
   '/kontakt': typeof KontaktRoute
   '/ueber-uns': typeof UeberUnsRoute
+  '/guides/alttexte': typeof GuidesAlttexteRoute
+  '/guides/kontrast': typeof GuidesKontrastRoute
+  '/guides/tastatur-navigation': typeof GuidesTastaturNavigationRoute
   '/leistungen/barrierefreier-onlineshop': typeof LeistungenBarrierefreierOnlineshopRoute
   '/leistungen/betreuung': typeof LeistungenBetreuungRoute
   '/leistungen/bfsg-audit': typeof LeistungenBfsgAuditRoute
+  '/recht/widerrufsbutton': typeof RechtWiderrufsbuttonRoute
   '/wissen/bin-ich-betroffen': typeof WissenBinIchBetroffenRoute
   '/wissen/faq': typeof WissenFaqRoute
   '/wissen/was-ist-bfsg': typeof WissenWasIstBfsgRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/barrierefreiheitserklaerung': typeof BarrierefreiheitserklaerungRoute
   '/bfsg-check': typeof BfsgCheckRoute
+  '/datenschutz': typeof DatenschutzRoute
+  '/impressum': typeof ImpressumRoute
   '/kontakt': typeof KontaktRoute
   '/ueber-uns': typeof UeberUnsRoute
+  '/guides/alttexte': typeof GuidesAlttexteRoute
+  '/guides/kontrast': typeof GuidesKontrastRoute
+  '/guides/tastatur-navigation': typeof GuidesTastaturNavigationRoute
   '/leistungen/barrierefreier-onlineshop': typeof LeistungenBarrierefreierOnlineshopRoute
   '/leistungen/betreuung': typeof LeistungenBetreuungRoute
   '/leistungen/bfsg-audit': typeof LeistungenBfsgAuditRoute
+  '/recht/widerrufsbutton': typeof RechtWiderrufsbuttonRoute
   '/wissen/bin-ich-betroffen': typeof WissenBinIchBetroffenRoute
   '/wissen/faq': typeof WissenFaqRoute
   '/wissen/was-ist-bfsg': typeof WissenWasIstBfsgRoute
@@ -99,12 +157,19 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/barrierefreiheitserklaerung': typeof BarrierefreiheitserklaerungRoute
   '/bfsg-check': typeof BfsgCheckRoute
+  '/datenschutz': typeof DatenschutzRoute
+  '/impressum': typeof ImpressumRoute
   '/kontakt': typeof KontaktRoute
   '/ueber-uns': typeof UeberUnsRoute
+  '/guides/alttexte': typeof GuidesAlttexteRoute
+  '/guides/kontrast': typeof GuidesKontrastRoute
+  '/guides/tastatur-navigation': typeof GuidesTastaturNavigationRoute
   '/leistungen/barrierefreier-onlineshop': typeof LeistungenBarrierefreierOnlineshopRoute
   '/leistungen/betreuung': typeof LeistungenBetreuungRoute
   '/leistungen/bfsg-audit': typeof LeistungenBfsgAuditRoute
+  '/recht/widerrufsbutton': typeof RechtWiderrufsbuttonRoute
   '/wissen/bin-ich-betroffen': typeof WissenBinIchBetroffenRoute
   '/wissen/faq': typeof WissenFaqRoute
   '/wissen/was-ist-bfsg': typeof WissenWasIstBfsgRoute
@@ -113,36 +178,57 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/barrierefreiheitserklaerung'
     | '/bfsg-check'
+    | '/datenschutz'
+    | '/impressum'
     | '/kontakt'
     | '/ueber-uns'
+    | '/guides/alttexte'
+    | '/guides/kontrast'
+    | '/guides/tastatur-navigation'
     | '/leistungen/barrierefreier-onlineshop'
     | '/leistungen/betreuung'
     | '/leistungen/bfsg-audit'
+    | '/recht/widerrufsbutton'
     | '/wissen/bin-ich-betroffen'
     | '/wissen/faq'
     | '/wissen/was-ist-bfsg'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/barrierefreiheitserklaerung'
     | '/bfsg-check'
+    | '/datenschutz'
+    | '/impressum'
     | '/kontakt'
     | '/ueber-uns'
+    | '/guides/alttexte'
+    | '/guides/kontrast'
+    | '/guides/tastatur-navigation'
     | '/leistungen/barrierefreier-onlineshop'
     | '/leistungen/betreuung'
     | '/leistungen/bfsg-audit'
+    | '/recht/widerrufsbutton'
     | '/wissen/bin-ich-betroffen'
     | '/wissen/faq'
     | '/wissen/was-ist-bfsg'
   id:
     | '__root__'
     | '/'
+    | '/barrierefreiheitserklaerung'
     | '/bfsg-check'
+    | '/datenschutz'
+    | '/impressum'
     | '/kontakt'
     | '/ueber-uns'
+    | '/guides/alttexte'
+    | '/guides/kontrast'
+    | '/guides/tastatur-navigation'
     | '/leistungen/barrierefreier-onlineshop'
     | '/leistungen/betreuung'
     | '/leistungen/bfsg-audit'
+    | '/recht/widerrufsbutton'
     | '/wissen/bin-ich-betroffen'
     | '/wissen/faq'
     | '/wissen/was-ist-bfsg'
@@ -150,12 +236,19 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BarrierefreiheitserklaerungRoute: typeof BarrierefreiheitserklaerungRoute
   BfsgCheckRoute: typeof BfsgCheckRoute
+  DatenschutzRoute: typeof DatenschutzRoute
+  ImpressumRoute: typeof ImpressumRoute
   KontaktRoute: typeof KontaktRoute
   UeberUnsRoute: typeof UeberUnsRoute
+  GuidesAlttexteRoute: typeof GuidesAlttexteRoute
+  GuidesKontrastRoute: typeof GuidesKontrastRoute
+  GuidesTastaturNavigationRoute: typeof GuidesTastaturNavigationRoute
   LeistungenBarrierefreierOnlineshopRoute: typeof LeistungenBarrierefreierOnlineshopRoute
   LeistungenBetreuungRoute: typeof LeistungenBetreuungRoute
   LeistungenBfsgAuditRoute: typeof LeistungenBfsgAuditRoute
+  RechtWiderrufsbuttonRoute: typeof RechtWiderrufsbuttonRoute
   WissenBinIchBetroffenRoute: typeof WissenBinIchBetroffenRoute
   WissenFaqRoute: typeof WissenFaqRoute
   WissenWasIstBfsgRoute: typeof WissenWasIstBfsgRoute
@@ -170,6 +263,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UeberUnsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/kontakt': {
+      id: '/kontakt'
+      path: '/kontakt'
+      fullPath: '/kontakt'
+      preLoaderRoute: typeof KontaktRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/impressum': {
+      id: '/impressum'
+      path: '/impressum'
+      fullPath: '/impressum'
+      preLoaderRoute: typeof ImpressumRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/datenschutz': {
+      id: '/datenschutz'
+      path: '/datenschutz'
+      fullPath: '/datenschutz'
+      preLoaderRoute: typeof DatenschutzRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/bfsg-check': {
       id: '/bfsg-check'
       path: '/bfsg-check'
@@ -177,11 +291,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BfsgCheckRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/kontakt': {
-      id: '/kontakt'
-      path: '/kontakt'
-      fullPath: '/kontakt'
-      preLoaderRoute: typeof KontaktRouteImport
+    '/barrierefreiheitserklaerung': {
+      id: '/barrierefreiheitserklaerung'
+      path: '/barrierefreiheitserklaerung'
+      fullPath: '/barrierefreiheitserklaerung'
+      preLoaderRoute: typeof BarrierefreiheitserklaerungRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -212,6 +326,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WissenBinIchBetroffenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/recht/widerrufsbutton': {
+      id: '/recht/widerrufsbutton'
+      path: '/recht/widerrufsbutton'
+      fullPath: '/recht/widerrufsbutton'
+      preLoaderRoute: typeof RechtWiderrufsbuttonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/leistungen/bfsg-audit': {
       id: '/leistungen/bfsg-audit'
       path: '/leistungen/bfsg-audit'
@@ -233,18 +354,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LeistungenBarrierefreierOnlineshopRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guides/tastatur-navigation': {
+      id: '/guides/tastatur-navigation'
+      path: '/guides/tastatur-navigation'
+      fullPath: '/guides/tastatur-navigation'
+      preLoaderRoute: typeof GuidesTastaturNavigationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guides/kontrast': {
+      id: '/guides/kontrast'
+      path: '/guides/kontrast'
+      fullPath: '/guides/kontrast'
+      preLoaderRoute: typeof GuidesKontrastRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guides/alttexte': {
+      id: '/guides/alttexte'
+      path: '/guides/alttexte'
+      fullPath: '/guides/alttexte'
+      preLoaderRoute: typeof GuidesAlttexteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BarrierefreiheitserklaerungRoute: BarrierefreiheitserklaerungRoute,
   BfsgCheckRoute: BfsgCheckRoute,
+  DatenschutzRoute: DatenschutzRoute,
+  ImpressumRoute: ImpressumRoute,
   KontaktRoute: KontaktRoute,
   UeberUnsRoute: UeberUnsRoute,
+  GuidesAlttexteRoute: GuidesAlttexteRoute,
+  GuidesKontrastRoute: GuidesKontrastRoute,
+  GuidesTastaturNavigationRoute: GuidesTastaturNavigationRoute,
   LeistungenBarrierefreierOnlineshopRoute:
     LeistungenBarrierefreierOnlineshopRoute,
   LeistungenBetreuungRoute: LeistungenBetreuungRoute,
   LeistungenBfsgAuditRoute: LeistungenBfsgAuditRoute,
+  RechtWiderrufsbuttonRoute: RechtWiderrufsbuttonRoute,
   WissenBinIchBetroffenRoute: WissenBinIchBetroffenRoute,
   WissenFaqRoute: WissenFaqRoute,
   WissenWasIstBfsgRoute: WissenWasIstBfsgRoute,

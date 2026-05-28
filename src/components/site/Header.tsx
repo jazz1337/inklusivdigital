@@ -27,6 +27,16 @@ const NAV: NavItem[] = [
       { to: "/wissen/faq", label: "FAQ", description: "Häufige Fragen" },
     ],
   },
+  {
+    type: "dropdown",
+    label: "Guides & Praxis",
+    items: [
+      { to: "/guides/alttexte", label: "Alt-Texte schreiben", description: "Bilder für alle verständlich machen" },
+      { to: "/guides/tastatur-navigation", label: "Tastatur-Navigation", description: "Volle Bedienbarkeit ohne Maus" },
+      { to: "/guides/kontrast", label: "Kontrast & Lesbarkeit", description: "WCAG-Anforderungen verstehen" },
+      { to: "/recht/widerrufsbutton", label: "Widerrufsbutton §312j BGB", description: "Pflichtbutton für Online-Shops" },
+    ],
+  },
   { type: "link", to: "/ueber-uns", label: "Über uns" },
 ];
 

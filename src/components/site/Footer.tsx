@@ -4,7 +4,7 @@ export function Footer() {
   return (
     <footer className="border-t border-border bg-surface">
       <div className="mx-auto max-w-7xl px-4 py-12 md:px-6">
-        <div className="grid gap-10 md:grid-cols-4">
+        <div className="grid gap-10 md:grid-cols-5">
           <div>
             <Link to="/" aria-label="InklusivDigital – Startseite">
               <img
@@ -36,6 +36,15 @@ export function Footer() {
             ]}
           />
           <FooterCol
+            title="Guides & Praxis"
+            links={[
+              { to: "/guides/alttexte", label: "Alt-Texte schreiben" },
+              { to: "/guides/tastatur-navigation", label: "Tastatur-Navigation" },
+              { to: "/guides/kontrast", label: "Kontrast & Lesbarkeit" },
+              { to: "/recht/widerrufsbutton", label: "Widerrufsbutton" },
+            ]}
+          />
+          <FooterCol
             title="Rechtliches"
             links={[
               { to: "/kontakt", label: "Kontakt" },
@@ -47,7 +56,7 @@ export function Footer() {
         </div>
 
         <div className="mt-10 flex flex-col items-start justify-between gap-3 border-t border-border pt-6 text-xs text-muted-foreground md:flex-row md:items-center">
-          <p>© {new Date().getFullYear()} BFSG.Agentur. Alle Rechte vorbehalten.</p>
+          <p>© {new Date().getFullYear()} InklusivDigital. Alle Rechte vorbehalten.</p>
           <p>Made with care for an inclusive web.</p>
         </div>
       </div>

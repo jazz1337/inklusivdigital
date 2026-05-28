@@ -30,14 +30,14 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "BFSG.Agentur – Barrierefreie Websites & Onlineshops" },
+      { title: "InklusivDigital – Barrierefreie Websites & Onlineshops" },
       {
         name: "description",
         content:
           "Wir machen deine Website BFSG-konform: Audit, Umsetzung und laufende Betreuung. Pragmatisch, rechtssicher, ohne Floskeln.",
       },
-      { name: "author", content: "BFSG.Agentur" },
-      { property: "og:title", content: "BFSG.Agentur – Barrierefreie Websites & Onlineshops" },
+      { name: "author", content: "InklusivDigital" },
+      { property: "og:title", content: "InklusivDigital – Barrierefreie Websites & Onlineshops" },
       { property: "og:description", content: "Audit, Umsetzung und laufende Betreuung für BFSG-Konformität." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

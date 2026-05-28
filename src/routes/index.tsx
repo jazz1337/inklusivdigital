@@ -17,7 +17,7 @@ import { CTAButton } from "@/components/site/CTAButton";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "BFSG.Agentur – Barrierefreie Websites, ohne Floskeln" },
+      { title: "InklusivDigital – Barrierefreie Websites, ohne Floskeln" },
       {
         name: "description",
         content:
@@ -72,26 +72,6 @@ function HomePage() {
                 <PageSpeedScanner compact />
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* KUNDENLOGOS Platzhalter */}
-      <section className="border-b border-border bg-background py-10">
-        <div className="mx-auto max-w-6xl px-4 md:px-6">
-          <p className="mb-6 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Kundenlogos folgen
-          </p>
-          <div className="grid grid-cols-2 gap-4 opacity-60 sm:grid-cols-3 md:grid-cols-5">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div
-                key={i}
-                className="grid h-12 place-items-center rounded-md border border-dashed border-border text-xs text-muted-foreground"
-                aria-hidden
-              >
-                Logo
-              </div>
-            ))}
           </div>
         </div>
       </section>
@@ -160,13 +140,6 @@ function HomePage() {
           <Principle icon={<Eye />} title="Transparent" text="Du erfährst, was wir tun, warum wir es tun – und was du selbst übernehmen kannst." />
           <Principle icon={<KeyRound />} title="Pragmatisch" text="Keine 100-seitigen PDFs ohne Wirkung. Sondern Maßnahmen, die heute umsetzbar sind." />
           <Principle icon={<CheckCircle2 />} title="Rechtssicher" text="WCAG 2.1 AA, DIN EN 301 549. Wir kennen die Standards und liefern verlässlich." />
-        </div>
-      </Section>
-
-      {/* TESTIMONIAL Platzhalter */}
-      <Section tone="surface" size="compact">
-        <div className="rounded-2xl border border-dashed border-border bg-background p-8 text-center text-sm text-muted-foreground">
-          Hier erscheint später ein Kundenstimme (Testimonial-Platzhalter).
         </div>
       </Section>
 
