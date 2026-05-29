@@ -41,7 +41,7 @@ function KontrastPage() {
 
       <Section tone="surface">
         <SectionHeading eyebrow="Die Standards" title="Was WCAG verlangt" />
-        <div className="mt-10 grid gap-4 md:grid-cols-3">
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
           {STANDARDS.map((s) => (
             <StandardCard key={s.ratio} {...s} />
           ))}
@@ -59,7 +59,7 @@ function KontrastPage() {
 
       <Section tone="surface">
         <SectionHeading eyebrow="Werkzeuge" title="Kontrast prüfen" align="center" />
-        <div className="mt-10 grid gap-4 md:grid-cols-3">
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
           {TOOLS.map((t) => (
             <ToolCard key={t.name} {...t} />
           ))}
@@ -207,7 +207,7 @@ function ExampleCard({
       <div className="grid grid-cols-2 gap-3">
         <div>
           <div
-            className="flex min-h-16 items-center justify-center rounded-lg p-3 text-sm font-medium"
+            className="flex min-h-14 items-center justify-center rounded-lg p-2 text-xs font-medium sm:min-h-16 sm:p-3 sm:text-sm"
             style={{ color: bad.fg, backgroundColor: bad.bg }}
           >
             {bad.text}
@@ -218,7 +218,7 @@ function ExampleCard({
         </div>
         <div>
           <div
-            className="flex min-h-16 items-center justify-center rounded-lg p-3 text-sm font-medium"
+            className="flex min-h-14 items-center justify-center rounded-lg p-2 text-xs font-medium sm:min-h-16 sm:p-3 sm:text-sm"
             style={{ color: good.fg, backgroundColor: good.bg }}
           >
             {good.text}

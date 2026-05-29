@@ -4,7 +4,7 @@ export function Footer() {
   return (
     <footer className="border-t border-border bg-surface">
       <div className="mx-auto max-w-7xl px-4 py-12 md:px-6">
-        <div className="grid gap-10 md:grid-cols-5">
+        <div className="grid gap-10 sm:grid-cols-2 md:grid-cols-5">
           <div>
             <Link to="/" aria-label="InklusivDigital – Startseite">
               <img

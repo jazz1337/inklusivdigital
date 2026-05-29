@@ -163,7 +163,7 @@ function BfsgAuditPage() {
 
       <Section tone="surface">
         <SectionHeading eyebrow="Für wen?" title="Für wen ist dieses Audit?" />
-        <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {ZIELGRUPPEN.map(({ title, text }) => (
             <div key={title} className="rounded-2xl border border-border bg-card p-6">
               <div className="mb-3 grid h-9 w-9 place-items-center rounded-lg bg-accent/15 text-accent-foreground">

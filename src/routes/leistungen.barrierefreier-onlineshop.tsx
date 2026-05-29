@@ -106,7 +106,7 @@ function ShopPage() {
           {CMS.map((name) => (
             <div
               key={name}
-              className="grid h-20 place-items-center rounded-xl border border-border bg-card text-sm font-semibold text-muted-foreground grayscale transition hover:grayscale-0 hover:text-foreground"
+              className="grid h-20 place-items-center rounded-xl border border-border bg-card p-2 text-center text-xs font-semibold text-muted-foreground grayscale transition hover:grayscale-0 hover:text-foreground sm:text-sm"
             >
               {name}
             </div>
