@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { CheckCircle2, XCircle, Eye, EyeOff } from "lucide-react";
-import { PageHero } from "@/components/site/PageHero";
 import { Section, SectionHeading } from "@/components/site/Section";
 import { CTAButton } from "@/components/site/CTAButton";
 
@@ -22,11 +21,28 @@ export const Route = createFileRoute("/guides/alttexte")({
 function AlttextePage() {
   return (
     <>
-      <PageHero
-        eyebrow="Guides & Praxis"
-        title="Alt-Texte richtig schreiben"
-        intro="Alt-Texte sind die Beschreibung eines Bildes für Nutzer, die es nicht sehen können – Screenreader-Nutzer, aber auch Suchmaschinen. Ein guter Alt-Text beschreibt den Informationsgehalt, nicht das Aussehen."
-      />
+      {/* Banner */}
+      <div className="relative overflow-hidden border-b border-border">
+        <img
+          src={`${import.meta.env.BASE_URL}Banner_Alttexte_1536x1024.png`}
+          alt="Frau mit Kopfhörern arbeitet am Laptop – auf dem Bildschirm sind Alt-Text-Tooltips über Produktbildern sichtbar, die der Screenreader vorliest"
+          className="h-64 w-full object-cover object-top md:h-80 lg:h-96"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-foreground/60 via-foreground/20 to-transparent" />
+        <div className="absolute inset-0 flex items-center">
+          <div className="mx-auto w-full max-w-7xl px-4 md:px-6">
+            <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white backdrop-blur-sm">
+              Guides & Praxis
+            </p>
+            <h1 className="font-display text-3xl font-bold text-white md:text-5xl lg:text-6xl">
+              Alt-Texte richtig schreiben
+            </h1>
+            <p className="mt-3 max-w-xl text-sm text-white/80 md:text-base">
+              Alt-Texte sind die Beschreibung eines Bildes für Nutzer, die es nicht sehen können – Screenreader-Nutzer, aber auch Suchmaschinen.
+            </p>
+          </div>
+        </div>
+      </div>
 
       <Section>
         <SectionHeading
