@@ -39,11 +39,11 @@ function ScoreRing({ label, value }: { label: string; value: number | null }) {
   const v = value ?? 0;
   const tone = v >= 90 ? "text-success" : v >= 50 ? "text-warning" : "text-destructive";
   return (
-    <div className="flex flex-col items-center gap-2 rounded-xl border border-border bg-card p-4">
-      <div className={`text-3xl font-bold ${tone}`} aria-hidden>
+    <div className="flex flex-col items-center gap-1 rounded-xl border border-border bg-card p-2 sm:gap-2 sm:p-4">
+      <div className={`text-2xl font-bold sm:text-3xl ${tone}`} aria-hidden>
         {value ?? "—"}
       </div>
-      <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</div>
+      <div className="text-center text-[10px] font-medium uppercase tracking-tight text-muted-foreground sm:text-xs sm:tracking-wide">{label}</div>
     </div>
   );
 }

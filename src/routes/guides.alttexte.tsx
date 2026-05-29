@@ -21,25 +21,26 @@ export const Route = createFileRoute("/guides/alttexte")({
 function AlttextePage() {
   return (
     <>
-      {/* Banner */}
-      <div className="relative overflow-hidden border-b border-border">
-        <img
-          src={`${import.meta.env.BASE_URL}Banner_Alttexte_1536x1024.png`}
-          alt="Frau mit Kopfhörern arbeitet am Laptop – auf dem Bildschirm sind Alt-Text-Tooltips über Produktbildern sichtbar, die der Screenreader vorliest"
-          className="h-64 w-full object-cover object-top md:h-80 lg:h-96"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-foreground/60 via-foreground/20 to-transparent" />
-        <div className="absolute inset-0 flex items-center">
-          <div className="mx-auto w-full max-w-7xl px-4 md:px-6">
-            <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white backdrop-blur-sm">
+      {/* Banner – Split Layout */}
+      <div className="border-b border-border bg-[image:var(--gradient-hero)]">
+        <div className="mx-auto grid max-w-7xl items-center gap-8 px-4 py-12 md:px-6 md:py-16 lg:grid-cols-2 lg:gap-12">
+          <div>
+            <p className="mb-4 inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
               Guides & Praxis
             </p>
-            <h1 className="font-display text-3xl font-bold text-white md:text-5xl lg:text-6xl">
+            <h1 className="font-display text-3xl font-bold leading-tight text-foreground md:text-5xl lg:text-6xl">
               Alt-Texte richtig schreiben
             </h1>
-            <p className="mt-3 max-w-xl text-sm text-white/80 md:text-base">
-              Alt-Texte sind die Beschreibung eines Bildes für Nutzer, die es nicht sehen können – Screenreader-Nutzer, aber auch Suchmaschinen.
+            <p className="mt-4 max-w-xl text-base text-muted-foreground md:text-lg">
+              Alt-Texte sind die Beschreibung eines Bildes für Nutzer, die es nicht sehen können – Screenreader-Nutzer, aber auch Suchmaschinen. Ein guter Alt-Text beschreibt den Informationsgehalt, nicht das Aussehen.
             </p>
+          </div>
+          <div className="overflow-hidden rounded-2xl border border-border shadow-[var(--shadow-card)]">
+            <img
+              src={`${import.meta.env.BASE_URL}Banner_Alttexte_1536x1024.png`}
+              alt="Frau mit Kopfhörern arbeitet am Laptop – auf dem Bildschirm sind Alt-Text-Tooltips über Produktbildern sichtbar, die der Screenreader vorliest"
+              className="w-full object-cover"
+            />
           </div>
         </div>
       </div>

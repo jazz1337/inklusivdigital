@@ -201,7 +201,7 @@ function ServiceCard({
 function Stat({ value, label }: { value: string; label: string }) {
   return (
     <div className="rounded-2xl border border-border bg-card p-6">
-      <div className="font-display text-3xl font-bold text-primary md:text-4xl">{value}</div>
+      <div className="font-display text-2xl font-bold text-primary md:text-3xl lg:text-4xl">{value}</div>
       <p className="mt-2 text-sm text-muted-foreground">{label}</p>
     </div>
   );

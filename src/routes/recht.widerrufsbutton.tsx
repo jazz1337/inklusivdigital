@@ -82,7 +82,7 @@ function WiderrufsButtonPage() {
 
       <Section tone="surface">
         <SectionHeading eyebrow="Risiken" title="Was passiert bei Verstoß?" />
-        <div className="mt-10 grid gap-4 md:grid-cols-3">
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
           {RISKS.map((r) => (
             <RiskCard key={r.title} {...r} />
           ))}
