@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { CheckCircle2, XCircle } from "lucide-react";
-import { PageHero } from "@/components/site/PageHero";
+import { CheckCircle2, XCircle, ExternalLink } from "lucide-react";
 import { Section, SectionHeading } from "@/components/site/Section";
 import { CTAButton } from "@/components/site/CTAButton";
 
@@ -22,11 +21,32 @@ export const Route = createFileRoute("/guides/kontrast")({
 function KontrastPage() {
   return (
     <>
-      <PageHero
-        eyebrow="Guides & Praxis"
-        title="Kontrastverhältnisse & Lesbarkeit"
-        intro="8 % der Männer und 0,5 % der Frauen haben eine Farbsehschwäche. Hinzu kommen Nutzer in hellem Sonnenlicht oder mit gealtertem Display. Ausreichender Kontrast hilft allen."
-      />
+      {/* Banner – Split: Bild links, Text rechts */}
+      <div className="border-b border-border">
+        <div className="grid lg:grid-cols-2">
+          <div className="overflow-hidden">
+            <img
+              src={`${import.meta.env.BASE_URL}Banner_Kontrast_16-9.jpg`}
+              alt="Overhead-Aufnahme eines Designerarbeitsplatzes mit Farbmustern, Farbpaletten und einem Laptop mit geöffnetem Kontrast-Checker"
+              className="h-full w-full object-cover"
+              style={{ minHeight: "280px" }}
+            />
+          </div>
+          <div className="flex items-center bg-[image:var(--gradient-hero)] px-4 py-12 md:px-10 md:py-16">
+            <div>
+              <p className="mb-4 inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
+                Guides & Praxis
+              </p>
+              <h1 className="font-display text-3xl font-bold leading-tight text-foreground md:text-5xl lg:text-6xl">
+                Kontrast & Lesbarkeit
+              </h1>
+              <p className="mt-4 max-w-md text-sm text-muted-foreground md:text-base">
+                8 % der Männer und 0,5 % der Frauen haben eine Farbsehschwäche. Hinzu kommen Nutzer in hellem Sonnenlicht oder mit gealtertem Display. Ausreichender Kontrast hilft allen.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <Section>
         <SectionHeading
@@ -70,6 +90,7 @@ function KontrastPage() {
           </CTAButton>
         </div>
       </Section>
+
     </>
   );
 }
@@ -236,19 +257,32 @@ function ToolCard({
   name,
   description,
   type,
+  url,
 }: {
   name: string;
   description: string;
   type: string;
+  url: string;
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-5">
-      <span className="mb-2 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group flex flex-col rounded-2xl border border-border bg-card p-5 transition hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-[var(--shadow-card)]"
+    >
+      <div className="mb-4 flex items-center justify-between">
+        <div className="h-10 w-10 rounded-xl bg-muted/60 flex items-center justify-center">
+          <div className="h-5 w-5 rounded bg-muted" aria-hidden />
+        </div>
+        <ExternalLink className="h-4 w-4 text-muted-foreground transition group-hover:text-primary" aria-hidden />
+      </div>
+      <span className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
         {type}
       </span>
       <h3 className="font-display text-base font-bold text-foreground">{name}</h3>
-      <p className="mt-2 text-sm text-muted-foreground">{description}</p>
-    </div>
+      <p className="mt-2 flex-1 text-sm text-muted-foreground">{description}</p>
+    </a>
   );
 }
 
@@ -312,15 +346,18 @@ const TOOLS = [
     name: "WebAIM Contrast Checker",
     type: "Browser-Tool",
     description: "Einfache Web-App: Hex-Farben eingeben, sofort Ergebnis. Ideal für schnelle Checks.",
+    url: "https://webaim.org/resources/contrastchecker/",
   },
   {
     name: "axe DevTools",
     type: "Browser-Extension",
     description: "Scannt die gesamte Seite auf Kontrast- und andere WCAG-Probleme direkt im Browser.",
+    url: "https://www.deque.com/axe/devtools/",
   },
   {
     name: "Figma A11y Annotation Kit",
     type: "Design-Tool",
     description: "Kontrastprüfung direkt im Figma-Design, bevor eine Zeile Code geschrieben wird.",
+    url: "https://www.figma.com/community/plugin/1208180794570801545",
   },
 ];

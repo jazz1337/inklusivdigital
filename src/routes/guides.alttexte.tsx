@@ -53,15 +53,15 @@ function AlttextePage() {
         <div className="mt-10 grid gap-6 md:grid-cols-2">
           <AltTextDemo
             label="Schlechtes Beispiel"
-            altText="Bild1.jpg"
+            altText="bild_schuhe_01.jpg"
             variant="bad"
             description="Dateiname als Alt-Text – gibt Nutzern keine Information."
           />
           <AltTextDemo
             label="Gutes Beispiel"
-            altText="Frau mit Headset liest auf einem Tablet die InklusivDigital-Website – die Seite zeigt eine barrierefrei gestaltete Produktseite."
+            altText="Blaue Laufschuhe mit weißer Sohle, Seitenansicht auf weißem Hintergrund"
             variant="good"
-            description="Beschreibt den relevanten Inhalt und Kontext des Bildes."
+            description="Beschreibt den relevanten Inhalt und Kontext des Bildes präzise."
           />
         </div>
       </Section>
@@ -164,13 +164,15 @@ function AltTextDemo({
       </div>
       <div className="min-h-32 rounded-xl border border-border bg-card">
         {showAlt ? (
-          <div className="flex min-h-32 items-center justify-center p-4 text-sm text-muted-foreground">
-            <p className="italic">„{altText}"</p>
+          <div className="flex min-h-40 items-center justify-center p-6 text-sm text-muted-foreground">
+            <p className="italic text-center">„{altText}"</p>
           </div>
         ) : (
-          <div className="flex min-h-32 items-center justify-center rounded-xl bg-muted/30 text-xs text-muted-foreground">
-            [Bild-Platzhalter]
-          </div>
+          <img
+            src={`${import.meta.env.BASE_URL}Beispielfoto_Sneaker_Blau.jpg`}
+            alt={variant === "good" ? "Blaue Laufschuhe mit weißer Sohle, Seitenansicht auf weißem Hintergrund" : ""}
+            className="h-40 w-full rounded-xl object-cover"
+          />
         )}
       </div>
       <p className="mt-3 text-xs text-muted-foreground">{description}</p>
