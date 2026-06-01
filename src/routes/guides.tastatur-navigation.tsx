@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { CheckCircle2, XCircle, Keyboard } from "lucide-react";
-import { PageHero } from "@/components/site/PageHero";
 import { Section, SectionHeading } from "@/components/site/Section";
 import { CTAButton } from "@/components/site/CTAButton";
 
@@ -22,11 +21,32 @@ export const Route = createFileRoute("/guides/tastatur-navigation")({
 function TastaturNavigationPage() {
   return (
     <>
-      <PageHero
-        eyebrow="Guides & Praxis"
-        title="Tastatur-Navigation"
-        intro="Über 7 % der Internetnutzer verwenden keine Maus. Vollständige Tastaturnavigation ist Pflicht nach WCAG 2.1 (Kriterium 2.1.1). Jede Funktion muss per Tastatur erreichbar und bedienbar sein."
-      />
+      {/* Banner – Split: Text links (dunkel), Bild rechts */}
+      <div className="border-b border-border">
+        <div className="grid lg:grid-cols-2">
+          <div className="flex items-center bg-foreground px-4 py-12 md:px-10 md:py-16">
+            <div>
+              <p className="mb-4 inline-flex items-center rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white">
+                Guides & Praxis
+              </p>
+              <h1 className="font-display text-3xl font-bold leading-tight text-white md:text-5xl lg:text-6xl">
+                Tastatur-Navigation
+              </h1>
+              <p className="mt-4 max-w-md text-sm text-white/70 md:text-base">
+                Über 7 % der Internetnutzer verwenden keine Maus. Vollständige Tastaturnavigation ist Pflicht nach WCAG 2.1 – jede Funktion muss per Tastatur erreichbar sein.
+              </p>
+            </div>
+          </div>
+          <div className="overflow-hidden">
+            <img
+              src={`${import.meta.env.BASE_URL}Banner_Tastatur_16-9.jpg`}
+              alt="Blinder Mann mit Kopfhörern und schwarzer Sonnenbrille tippt auf einer Tastatur – der Finger liegt auf der Tab-Taste, im Hintergrund läuft ein Online-Shop auf dem Monitor"
+              className="h-full w-full object-cover"
+              style={{ minHeight: "280px" }}
+            />
+          </div>
+        </div>
+      </div>
 
       <Section>
         <SectionHeading
