@@ -171,7 +171,7 @@ function AltTextDemo({
           <img
             src={`${import.meta.env.BASE_URL}Beispielfoto_Sneaker_Blau.jpg`}
             alt={variant === "good" ? "Blaue Laufschuhe mit weißer Sohle, Seitenansicht auf weißem Hintergrund" : ""}
-            className="h-40 w-full rounded-xl object-cover"
+            className="aspect-square w-full rounded-xl object-contain bg-white"
           />
         )}
       </div>
