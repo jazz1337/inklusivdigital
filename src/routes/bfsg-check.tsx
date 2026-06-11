@@ -23,26 +23,45 @@ export const Route = createFileRoute("/bfsg-check")({
 function BfsgCheckPage() {
   return (
     <>
-      {/* HERO mit großem Scanner */}
-      <section className="relative overflow-hidden border-b border-border bg-[image:var(--gradient-hero)]">
-        <div className="absolute inset-0 -z-10 opacity-70 [background-image:radial-gradient(circle_at_top_right,oklch(0.85_0.08_250/.55),transparent_55%)]" />
-        <div className="mx-auto max-w-4xl px-4 py-20 text-center md:px-6 md:py-28">
-          <p className="mb-5 inline-flex rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
+      {/* HERO mit großem Scanner – dunkel */}
+      <section className="relative overflow-hidden bg-foreground">
+        <div
+          className="absolute inset-0 [background-image:radial-gradient(ellipse_at_top_right,oklch(0.55_0.18_250/.4),transparent_55%),radial-gradient(ellipse_at_bottom_left,oklch(0.62_0.16_155/.25),transparent_50%)]"
+          aria-hidden="true"
+        />
+        <div
+          className="absolute inset-0 opacity-[0.05] [background-image:linear-gradient(white_1px,transparent_1px),linear-gradient(90deg,white_1px,transparent_1px)] [background-size:48px_48px]"
+          aria-hidden="true"
+        />
+        <div className="relative mx-auto max-w-4xl px-4 py-20 text-center md:px-6 md:py-28">
+          <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-white/80 backdrop-blur-sm">
+            <span className="h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true" />
             Kostenlos · keine Anmeldung
           </p>
-          <h1 className="font-display text-4xl font-bold leading-tight text-foreground md:text-6xl">
-            Der kostenlose BFSG-<span className="text-primary">Schnelltest</span>
+          <h1 className="font-display text-4xl font-bold leading-tight text-white md:text-6xl">
+            Der kostenlose BFSG-
+            <span className="bg-gradient-to-r from-[oklch(0.72_0.14_250)] to-[oklch(0.7_0.15_155)] bg-clip-text text-transparent">
+              Schnelltest
+            </span>
           </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
+          <p className="mx-auto mt-6 max-w-2xl text-lg text-white/70 md:text-xl">
             Ist deine Website bereit für das Barrierefreiheitsstärkungsgesetz? Mit unserem Schnelltest erhältst du
             innerhalb weniger Sekunden eine erste Einschätzung zu den offensichtlichsten Barrieren auf deiner Seite.
             Kostenlos, unverbindlich und direkt online.
           </p>
 
           <div className="mx-auto mt-10 max-w-2xl text-left">
-            <PageSpeedScanner />
+            <div className="rounded-3xl border border-white/15 bg-white/5 p-2 backdrop-blur-sm">
+              <div className="rounded-2xl bg-card p-5 shadow-[var(--shadow-card)] md:p-6">
+                <PageSpeedScanner />
+              </div>
+            </div>
           </div>
         </div>
+        <div
+          className="h-1 w-full bg-gradient-to-r from-primary via-success to-transparent"
+          aria-hidden="true"
+        />
       </section>
 
       {/* Was leistet der Check vs. was nicht */}

@@ -77,7 +77,7 @@ function ShopPage() {
           <>
             Betreibst du einen Onlineshop? Dann ist das Barrierefreiheitsstärkungsgesetz (BFSG) für dich kein
             „Nice-to-have", sondern Pflicht. Seit dem{" "}
-            <strong className="text-foreground">28. Juni 2025</strong> müssen Shops barrierefrei sein. Wir
+            <strong className="text-white">28. Juni 2025</strong> müssen Shops barrierefrei sein. Wir
             machen deinen Shop konform – strukturiert, nachweisbar und ohne Betriebsunterbrechung.
           </>
         }

@@ -2,13 +2,14 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import type { ReactNode } from "react";
 
-type Variant = "primary" | "secondary" | "ghost";
+type Variant = "primary" | "secondary" | "ghost" | "light";
 
 const styles: Record<Variant, string> = {
   primary:
     "bg-[image:var(--gradient-primary)] text-primary-foreground hover:opacity-90 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-glow)]",
   secondary: "bg-foreground text-background hover:bg-foreground/85",
   ghost: "bg-transparent text-foreground border border-border hover:bg-secondary hover:border-primary/20",
+  light: "bg-transparent text-white border border-white/25 hover:bg-white/10",
 };
 
 export function CTAButton({
