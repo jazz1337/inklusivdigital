@@ -49,13 +49,14 @@
   --font-display: "Manrope", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
 
-  --shadow-soft: 0 1px 2px 0 oklch(0.2 0.04 250 / 0.04), 0 4px 16px -4px oklch(0.2 0.04 250 / 0.08);
-  --shadow-card: 0 1px 3px 0 oklch(0.2 0.04 250 / 0.05), 0 8px 30px -6px oklch(0.2 0.04 250 / 0.12);
-  --shadow-glow: 0 10px 40px -10px oklch(0.55 0.18 250 / 0.35);
+  --shadow-soft: 0 1px 2px 0 oklch(0.2 0.04 250 / 0.05), 0 4px 16px -4px oklch(0.2 0.04 250 / 0.10);
+  --shadow-card: 0 1px 3px 0 oklch(0.2 0.04 250 / 0.06), 0 8px 30px -6px oklch(0.2 0.04 250 / 0.14);
+  --shadow-glow: 0 8px 32px -6px oklch(0.45 0.18 255 / 0.50);
 
-  --gradient-hero: linear-gradient(135deg, oklch(0.98 0.01 250) 0%, oklch(0.94 0.04 245) 100%);
-  --gradient-primary: linear-gradient(135deg, oklch(0.45 0.18 255) 0%, oklch(0.55 0.18 250) 100%);
+  --gradient-hero: linear-gradient(145deg, oklch(0.98 0.015 250) 0%, oklch(0.95 0.04 245) 100%);
+  --gradient-primary: linear-gradient(135deg, oklch(0.42 0.21 258) 0%, oklch(0.56 0.19 248) 100%);
   --gradient-accent: linear-gradient(135deg, oklch(0.7 0.16 50) 0%, oklch(0.62 0.18 30) 100%);
+  --gradient-success: linear-gradient(135deg, oklch(0.55 0.18 155) 0%, oklch(0.68 0.16 155) 100%);
 }
 
 :root {
@@ -97,8 +98,8 @@
   --input: oklch(0.92 0.01 250);
   --ring: oklch(0.55 0.18 250);
 
-  --surface: oklch(0.98 0.008 250);
-  --surface-strong: oklch(0.95 0.015 250);
+  --surface: oklch(0.966 0.018 250);
+  --surface-strong: oklch(0.94 0.025 250);
 }
 
 .dark {
