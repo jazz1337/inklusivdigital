@@ -33,10 +33,10 @@ function HomePage() {
     <>
       {/* HERO */}
       <section className="relative overflow-hidden border-b border-border bg-[image:var(--gradient-hero)]">
-        <div className="absolute inset-0 -z-10 opacity-70 [background-image:radial-gradient(circle_at_top_right,oklch(0.85_0.08_250/.55),transparent_55%),radial-gradient(circle_at_bottom_left,oklch(0.85_0.1_50/.3),transparent_50%)]" />
+        <div className="absolute inset-0 -z-10 [background-image:radial-gradient(ellipse_at_top_right,oklch(0.55_0.18_250/.15),transparent_55%),radial-gradient(ellipse_at_bottom_left,oklch(0.62_0.16_155/.12),transparent_50%)]" />
         <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 py-20 md:px-6 md:py-28 lg:grid-cols-[1.1fr_1fr]">
           <div>
-            <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
+            <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/8 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-primary">
               <Sparkles className="h-3.5 w-3.5" aria-hidden /> BFSG seit 28. Juni 2025 in Kraft
             </p>
             <h1 className="font-display text-4xl font-bold leading-[1.05] tracking-tight text-foreground md:text-6xl lg:text-7xl">

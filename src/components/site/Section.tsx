@@ -40,7 +40,15 @@ export function SectionHeading({
   return (
     <div className={cn("max-w-3xl", align === "center" && "mx-auto text-center")}>
       {eyebrow && (
-        <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-primary">{eyebrow}</p>
+        <p
+          className={cn(
+            "mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary",
+            align === "center" && "justify-center",
+          )}
+        >
+          <span className="h-0.5 w-5 rounded-full bg-primary" aria-hidden="true" />
+          {eyebrow}
+        </p>
       )}
       <h2 className="font-display text-3xl font-bold text-foreground md:text-4xl">{title}</h2>
       {intro && <p className="mt-4 text-lg text-muted-foreground">{intro}</p>}

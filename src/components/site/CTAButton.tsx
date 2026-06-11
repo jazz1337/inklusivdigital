@@ -6,9 +6,9 @@ type Variant = "primary" | "secondary" | "ghost";
 
 const styles: Record<Variant, string> = {
   primary:
-    "bg-primary text-primary-foreground hover:bg-primary/90 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-glow)]",
-  secondary: "bg-foreground text-background hover:bg-foreground/90",
-  ghost: "bg-transparent text-foreground border border-border hover:bg-secondary",
+    "bg-[image:var(--gradient-primary)] text-primary-foreground hover:opacity-90 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-glow)]",
+  secondary: "bg-foreground text-background hover:bg-foreground/85",
+  ghost: "bg-transparent text-foreground border border-border hover:bg-secondary hover:border-primary/20",
 };
 
 export function CTAButton({
