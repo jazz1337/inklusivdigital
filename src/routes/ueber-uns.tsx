@@ -31,8 +31,16 @@ function UeberUnsPage() {
   return (
     <>
       {/* HERO – dunkel, direkt */}
-      <div className="border-b border-border bg-foreground">
-        <div className="mx-auto max-w-7xl px-4 py-16 md:px-6 md:py-24">
+      <div className="relative overflow-hidden bg-foreground">
+        <div
+          className="absolute inset-0 [background-image:radial-gradient(ellipse_at_top_right,oklch(0.55_0.18_250/.35),transparent_55%),radial-gradient(ellipse_at_bottom_left,oklch(0.62_0.16_155/.22),transparent_50%)]"
+          aria-hidden="true"
+        />
+        <div
+          className="absolute inset-0 opacity-[0.05] [background-image:linear-gradient(white_1px,transparent_1px),linear-gradient(90deg,white_1px,transparent_1px)] [background-size:48px_48px]"
+          aria-hidden="true"
+        />
+        <div className="relative mx-auto max-w-7xl px-4 py-16 md:px-6 md:py-24">
           <p className="mb-5 inline-flex items-center rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white/70">
             Über uns
           </p>
@@ -60,6 +68,10 @@ function UeberUnsPage() {
             </Link>
           </div>
         </div>
+        <div
+          className="h-1 w-full bg-gradient-to-r from-primary via-success to-transparent"
+          aria-hidden="true"
+        />
       </div>
 
       {/* ORIGIN STORY */}
