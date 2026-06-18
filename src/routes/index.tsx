@@ -41,29 +41,52 @@ function HomePage() {
           className="absolute inset-0 opacity-[0.05] [background-image:linear-gradient(white_1px,transparent_1px),linear-gradient(90deg,white_1px,transparent_1px)] [background-size:48px_48px]"
           aria-hidden="true"
         />
+        {/* Focus-ring decorations */}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute top-[10%] right-[6%] h-16 w-28 animate-[var(--animate-focus-ring-1)] rounded border-2 border-[oklch(0.7_0.14_250/0.5)] shadow-[0_0_12px_oklch(0.7_0.14_250/0.3)]" />
+          <div className="absolute bottom-[15%] left-[4%] h-12 w-20 animate-[var(--animate-focus-ring-2)] rounded border-2 border-[oklch(0.7_0.15_155/0.45)] shadow-[0_0_10px_oklch(0.7_0.15_155/0.25)]" />
+          <div className="absolute top-[60%] right-[28%] h-8 w-14 animate-[var(--animate-focus-ring-3)] rounded border border-[oklch(0.7_0.14_250/0.3)]" />
+          <div className="absolute top-[35%] left-[22%] h-7 w-16 animate-[var(--animate-focus-ring-4)] rounded border border-[oklch(0.65_0.15_155/0.28)]" />
+        </div>
+
         <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-4 py-20 md:px-6 md:py-28 lg:grid-cols-[1.1fr_1fr]">
           <div>
-            <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-white/80 backdrop-blur-sm">
+            <p
+              className="mb-5 inline-flex animate-[var(--animate-float-in)] items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-white/80 backdrop-blur-sm"
+              style={{ animationDelay: "0ms" }}
+            >
               <Sparkles className="h-3.5 w-3.5 text-success" aria-hidden /> BFSG seit 28. Juni 2025 in Kraft
             </p>
-            <h1 className="font-display text-4xl font-bold leading-[1.05] tracking-tight text-white md:text-6xl lg:text-7xl">
+            <h1
+              className="font-display animate-[var(--animate-float-in)] text-4xl font-bold leading-[1.05] tracking-tight text-white md:text-6xl lg:text-7xl"
+              style={{ animationDelay: "80ms" }}
+            >
               Barrierefrei.<br />
               <span className="bg-gradient-to-r from-[oklch(0.72_0.14_250)] to-[oklch(0.7_0.15_155)] bg-clip-text text-transparent">
                 Rechtssicher.
               </span><br />
               Ohne Floskeln.
             </h1>
-            <p className="mt-6 max-w-xl text-lg text-white/70 md:text-xl">
+            <p
+              className="mt-6 max-w-xl animate-[var(--animate-float-in)] text-lg text-white/70 md:text-xl"
+              style={{ animationDelay: "160ms" }}
+            >
               Wir machen deine Website und deinen Onlineshop BFSG-konform – mit klarem
               Audit, sauberer Umsetzung und laufender Betreuung.
             </p>
-            <div className="mt-8 flex flex-wrap items-center gap-4">
+            <div
+              className="mt-8 flex animate-[var(--animate-float-in)] flex-wrap items-center gap-4"
+              style={{ animationDelay: "240ms" }}
+            >
               <CTAButton to="/bfsg-check">Kostenloser BFSG-Check</CTAButton>
               <CTAButton to="/leistungen/bfsg-audit" variant="light" withArrow={false}>
                 Leistungen ansehen
               </CTAButton>
             </div>
-            <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/60">
+            <ul
+              className="mt-8 flex animate-[var(--animate-float-in)] flex-wrap gap-x-6 gap-y-2 text-sm text-white/60"
+              style={{ animationDelay: "320ms" }}
+            >
               {["WCAG 2.1 AA", "DIN EN 301 549", "Klartext statt Floskeln"].map((t) => (
                 <li key={t} className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-success" aria-hidden /> {t}
@@ -72,8 +95,17 @@ function HomePage() {
             </ul>
           </div>
 
-          <div className="lg:pl-8">
-            <div className="rounded-3xl border border-white/15 bg-white/5 p-2 backdrop-blur-sm">
+          {/* Scanner card mit Scan-Beam */}
+          <div
+            className="animate-[var(--animate-float-in)] lg:pl-8"
+            style={{ animationDelay: "200ms" }}
+          >
+            <div className="relative rounded-3xl border border-white/15 bg-white/5 p-2 backdrop-blur-sm">
+              {/* Scan-Beam — fährt einmal über die Karte beim Laden */}
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 top-0 z-10 h-6 -translate-y-full animate-[var(--animate-scan)] rounded-3xl bg-gradient-to-b from-transparent via-[oklch(0.75_0.16_210/0.7)] to-transparent blur-[3px]"
+              />
               <div className="rounded-2xl bg-card p-5 shadow-[var(--shadow-card)] md:p-6">
                 <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-foreground">
                   <Gauge className="h-5 w-5 text-primary" aria-hidden /> BFSG-Schnelltest
