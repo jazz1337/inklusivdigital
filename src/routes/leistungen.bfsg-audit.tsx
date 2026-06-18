@@ -17,6 +17,7 @@ import { PageHero } from "@/components/site/PageHero";
 import { Section, SectionHeading } from "@/components/site/Section";
 import { CTAButton } from "@/components/site/CTAButton";
 import { PageSpeedScanner } from "@/components/site/PageSpeedScanner";
+import { AuditScanAnimation } from "@/components/site/AuditScanAnimation";
 
 export const Route = createFileRoute("/leistungen/bfsg-audit")({
   head: () => ({
@@ -178,7 +179,32 @@ function BfsgAuditPage() {
         </div>
       </Section>
 
-      {/* 3. Für wen */}
+      {/* 3. Automatisierte Folgeprüfung */}
+      <Section>
+        <div className="grid items-center gap-12 lg:grid-cols-2">
+          <div>
+            <SectionHeading
+              eyebrow="Automatisierung"
+              title="Und danach? Wir prüfen regelmäßig für dich."
+            />
+            <p className="mt-6 text-lg text-muted-foreground">
+              Ein Audit ist eine Momentaufnahme. Ein neues Plugin, ein Blogartikel ohne Alt-Text,
+              ein Theme-Update — Barrierefreiheit kann jederzeit wieder kippen.
+            </p>
+            <p className="mt-4 text-muted-foreground">
+              Auf Wunsch bauen wir eine Automatisierung, die deine Website in regelmäßigen
+              Abständen scannt, neue Barrieren identifiziert und dich sofort benachrichtigt —
+              bevor aus einem kleinen Fehler ein echtes Problem wird.
+            </p>
+            <div className="mt-8">
+              <CTAButton to="/leistungen/betreuung">Zur dauerhaften Betreuung</CTAButton>
+            </div>
+          </div>
+          <AuditScanAnimation />
+        </div>
+      </Section>
+
+      {/* 4. Für wen */}
       <Section>
         <SectionHeading eyebrow="Für wen?" title="Ist dieses Audit das Richtige für dich?" />
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
