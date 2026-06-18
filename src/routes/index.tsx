@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import {
   ArrowRight,
   CheckCircle2,
@@ -9,6 +10,8 @@ import {
   KeyRound,
   Gauge,
   Sparkles,
+  Pause,
+  Play,
 } from "lucide-react";
 import { PageSpeedScanner } from "@/components/site/PageSpeedScanner";
 import { Section, SectionHeading } from "@/components/site/Section";
@@ -29,6 +32,12 @@ export const Route = createFileRoute("/")({
 });
 
 function HomePage() {
+  const [paused, setPaused] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  });
+  const playState = paused ? "paused" : "running";
+
   return (
     <>
       {/* HERO – dunkel mit Glows */}
@@ -43,11 +52,26 @@ function HomePage() {
         />
         {/* Focus-ring decorations */}
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute top-[10%] right-[6%] h-16 w-28 animate-[var(--animate-focus-ring-1)] rounded border-2 border-[oklch(0.7_0.14_250/0.5)] shadow-[0_0_12px_oklch(0.7_0.14_250/0.3)]" />
-          <div className="absolute bottom-[15%] left-[4%] h-12 w-20 animate-[var(--animate-focus-ring-2)] rounded border-2 border-[oklch(0.7_0.15_155/0.45)] shadow-[0_0_10px_oklch(0.7_0.15_155/0.25)]" />
-          <div className="absolute top-[60%] right-[28%] h-8 w-14 animate-[var(--animate-focus-ring-3)] rounded border border-[oklch(0.7_0.14_250/0.3)]" />
-          <div className="absolute top-[35%] left-[22%] h-7 w-16 animate-[var(--animate-focus-ring-4)] rounded border border-[oklch(0.65_0.15_155/0.28)]" />
+          <div className="absolute top-[10%] right-[6%] h-16 w-28 animate-[var(--animate-focus-ring-1)] rounded border-2 border-[oklch(0.7_0.14_250/0.5)] shadow-[0_0_12px_oklch(0.7_0.14_250/0.3)]" style={{ animationPlayState: playState }} />
+          <div className="absolute bottom-[15%] left-[4%] h-12 w-20 animate-[var(--animate-focus-ring-2)] rounded border-2 border-[oklch(0.7_0.15_155/0.45)] shadow-[0_0_10px_oklch(0.7_0.15_155/0.25)]" style={{ animationPlayState: playState }} />
+          <div className="absolute top-[60%] right-[28%] h-8 w-14 animate-[var(--animate-focus-ring-3)] rounded border border-[oklch(0.7_0.14_250/0.3)]" style={{ animationPlayState: playState }} />
+          <div className="absolute top-[35%] left-[22%] h-7 w-16 animate-[var(--animate-focus-ring-4)] rounded border border-[oklch(0.65_0.15_155/0.28)]" style={{ animationPlayState: playState }} />
         </div>
+
+        {/* Pause-Button – klein, oben links, BFSG-konform */}
+        <button
+          type="button"
+          onClick={() => setPaused((p) => !p)}
+          aria-label={paused ? "Hintergrundanimationen fortsetzen" : "Hintergrundanimationen pausieren"}
+          aria-pressed={paused}
+          className="absolute left-3 top-3 z-20 rounded p-1.5 text-white/30 transition hover:text-white/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60"
+        >
+          {paused ? (
+            <Play className="h-3.5 w-3.5" aria-hidden="true" />
+          ) : (
+            <Pause className="h-3.5 w-3.5" aria-hidden="true" />
+          )}
+        </button>
 
         <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-4 py-20 md:px-6 md:py-28 lg:grid-cols-[1.1fr_1fr]">
           <div>
@@ -95,17 +119,12 @@ function HomePage() {
             </ul>
           </div>
 
-          {/* Scanner card mit Scan-Beam */}
+          {/* Scanner card */}
           <div
             className="animate-[var(--animate-float-in)] lg:pl-8"
             style={{ animationDelay: "200ms" }}
           >
-            <div className="relative rounded-3xl border border-white/15 bg-white/5 p-2 backdrop-blur-sm">
-              {/* Scan-Beam — fährt einmal über die Karte beim Laden */}
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-x-0 top-0 z-10 h-6 -translate-y-full animate-[var(--animate-scan)] rounded-3xl bg-gradient-to-b from-transparent via-[oklch(0.75_0.16_210/0.7)] to-transparent blur-[3px]"
-              />
+            <div className="rounded-3xl border border-white/15 bg-white/5 p-2 backdrop-blur-sm">
               <div className="rounded-2xl bg-card p-5 shadow-[var(--shadow-card)] md:p-6">
                 <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-foreground">
                   <Gauge className="h-5 w-5 text-primary" aria-hidden /> BFSG-Schnelltest

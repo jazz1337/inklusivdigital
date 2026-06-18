@@ -137,13 +137,6 @@
   to   { opacity: 1; transform: translateY(0);    }
 }
 
-@keyframes scan-beam {
-  0%   { transform: translateY(-100%); opacity: 0;   }
-  8%   { opacity: 1;                                  }
-  92%  { opacity: 1;                                  }
-  100% { transform: translateY(1400%); opacity: 0;   }
-}
-
 @keyframes focus-ring-fade {
   0%, 100% { opacity: 0;    transform: scale(0.94); }
   35%, 65% { opacity: 0.55; transform: scale(1);    }
@@ -151,7 +144,6 @@
 
 @theme inline {
   --animate-float-in:     float-in 0.55s ease-out both;
-  --animate-scan:         scan-beam 2s cubic-bezier(0.4,0,0.2,1) 0.9s 1 forwards;
   --animate-focus-ring-1: focus-ring-fade 5s ease-in-out 0s   infinite;
   --animate-focus-ring-2: focus-ring-fade 6s ease-in-out 1.8s infinite;
   --animate-focus-ring-3: focus-ring-fade 4s ease-in-out 3.2s infinite;
