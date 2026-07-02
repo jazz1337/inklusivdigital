@@ -213,7 +213,7 @@ html #cc-main {
   --cc-toggle-off-bg: oklch(0.55 0.02 255);
   --cc-toggle-on-knob-bg: #ffffff;
   --cc-toggle-off-knob-bg: #ffffff;
-  --cc-toggle-readonly-bg: oklch(0.75 0.05 155);
+  --cc-toggle-readonly-bg: oklch(0.55 0.13 155);
   --cc-toggle-readonly-knob-bg: #ffffff;
 
   --cc-cookie-category-block-bg: var(--surface);

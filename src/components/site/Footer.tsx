@@ -56,6 +56,7 @@ export function Footer() {
           >
             <button
               type="button"
+              aria-haspopup="dialog"
               onClick={showCookiePreferences}
               className="text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
