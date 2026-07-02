@@ -1,5 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 
+/*
+ * TODO (Kanzlei / finale Datenschutzerklärung) — folgende Verarbeitungen müssen in den Text:
+ * - Cloudflare Web Analytics (cookielos, berechtigtes Interesse Art. 6 Abs. 1 lit. f DSGVO)
+ * - Google Analytics 4 (nur nach Einwilligung, Art. 6 Abs. 1 lit. a DSGVO, anonymize_ip aktiv)
+ * - Consent-Logging via n8n-Webhook: consentId, Aktion, akzeptierte Kategorien, Revision;
+ *   serverseitig gekürzte IP; Aufbewahrung 3 Jahre (Nachweispflicht Art. 7 Abs. 1 DSGVO)
+ */
 export const Route = createFileRoute("/datenschutz")({
   head: () => ({
     meta: [
