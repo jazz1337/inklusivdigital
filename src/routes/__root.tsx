@@ -1,5 +1,7 @@
 import { Outlet, Link, createRootRoute, HeadContent } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { SiteLayout } from "@/components/site/SiteLayout";
+import { initConsent } from "@/lib/consent";
 
 function NotFoundComponent() {
   return (
@@ -48,6 +50,10 @@ export const Route = createRootRoute({
 });
 
 function RootComponent() {
+  useEffect(() => {
+    initConsent();
+  }, []);
+
   return (
     <>
       <HeadContent />
