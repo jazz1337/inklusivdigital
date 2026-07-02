@@ -1,0 +1,100 @@
+{
+  "name": "Kontaktformular → Google Sheets",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "4ead0250-670f-4039-982a-06a7dac14421",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "a1b2c3d4-0001-4000-8000-000000000001",
+      "name": "Kontaktformular Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "webhookId": "4ead0250-670f-4039-982a-06a7dac14421"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "HIER_DEINE_GOOGLE_SHEET_ID_EINFUEGEN"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "id",
+          "value": "gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Eingegangen am": "={{ $now.setZone('Europe/Berlin').toFormat('dd.LL.yyyy HH:mm') }}",
+            "Firmenname": "={{ $json.body.firmenname }}",
+            "Website": "={{ $json.body.websiteUrl }}",
+            "Branche": "={{ $json.body.branche }}",
+            "Mitarbeiterzahl": "={{ $json.body.mitarbeiterzahl }}",
+            "Name": "={{ $json.body.name }}",
+            "E-Mail": "={{ $json.body.email }}",
+            "Telefon": "={{ $json.body.telefon || '' }}",
+            "Anliegen": "={{ $json.body.wunsch }}",
+            "Kommentar": "={{ $json.body.kommentar || '' }}",
+            "Datenschutz akzeptiert": "={{ $json.body.datenschutz ? 'Ja' : 'Nein' }}"
+          },
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-0002-4000-8000-000000000002",
+      "name": "In Google Sheet eintragen",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [220, 0]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{ \"success\": true }",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0003-4000-8000-000000000003",
+      "name": "Antwort an Formular",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [440, 0]
+    }
+  ],
+  "connections": {
+    "Kontaktformular Webhook": {
+      "main": [
+        [
+          {
+            "node": "In Google Sheet eintragen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "In Google Sheet eintragen": {
+      "main": [
+        [
+          {
+            "node": "Antwort an Formular",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}
