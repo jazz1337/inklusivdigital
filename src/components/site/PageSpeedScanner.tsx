@@ -3,20 +3,31 @@ import { AlertCircle, CheckCircle2, Gauge, Loader2, Search, ShieldAlert } from "
 
 type Status = "idle" | "loading" | "success" | "error";
 
-type AuditItem = {
+type FailedItem = {
   id: string;
   title: string;
-  score: number | null;
   description?: string;
+};
+
+type ScanResponse = {
+  success: boolean;
+  error?: string;
+  reportId?: string;
+  url?: string;
+  score?: number | null;
+  failedCount?: number;
+  passedCount?: number;
+  manualCount?: number;
+  failedItems?: FailedItem[];
 };
 
 type Result = {
   url: string;
-  scores: { performance: number | null; accessibility: number | null; seo: number | null };
-  failingA11y: AuditItem[];
+  score: number | null;
+  failedCount: number;
+  failedItems: FailedItem[];
+  reportId?: string;
 };
-
-const PAGESPEED_ENDPOINT = "https://www.googleapis.com/pagespeedonline/v5/runPagespeed";
 
 function normalizeUrl(input: string): string | null {
   const trimmed = input.trim();
@@ -30,20 +41,17 @@ function normalizeUrl(input: string): string | null {
   }
 }
 
-function scoreToPercent(score: number | null | undefined): number | null {
-  if (typeof score !== "number") return null;
-  return Math.round(score * 100);
-}
-
-function ScoreRing({ label, value }: { label: string; value: number | null }) {
+function ScoreRing({ value }: { value: number | null }) {
   const v = value ?? 0;
   const tone = v >= 90 ? "text-success" : v >= 50 ? "text-warning" : "text-destructive";
   return (
-    <div className="flex flex-col items-center gap-1 rounded-xl border border-border bg-card p-2 sm:gap-2 sm:p-4">
-      <div className={`text-2xl font-bold sm:text-3xl ${tone}`} aria-hidden>
+    <div className="flex flex-col items-center gap-1 rounded-xl border border-border bg-card p-4 sm:gap-2 sm:p-6">
+      <div className={`text-3xl font-bold sm:text-4xl ${tone}`} aria-hidden>
         {value ?? "—"}
       </div>
-      <div className="text-center text-[10px] font-medium uppercase tracking-tight text-muted-foreground sm:text-xs sm:tracking-wide">{label}</div>
+      <div className="text-center text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        Barrierefreiheits-Score
+      </div>
     </div>
   );
 }
@@ -59,10 +67,10 @@ export function PageSpeedScanner({ compact = false }: { compact?: boolean }) {
     setErrorMsg(null);
     setResult(null);
 
-    const apiKey = import.meta.env.VITE_PAGESPEED_API_KEY as string | undefined;
-    if (!apiKey || apiKey.trim() === "") {
+    const webhookUrl = import.meta.env.VITE_SCAN_WEBHOOK_URL as string | undefined;
+    if (!webhookUrl || webhookUrl.trim() === "") {
       setStatus("error");
-      setErrorMsg("API-Key nicht konfiguriert. Bitte Konfiguration prüfen.");
+      setErrorMsg("Der Schnelltest ist aktuell nicht konfiguriert. Bitte versuche es später erneut.");
       return;
     }
 
@@ -76,44 +84,24 @@ export function PageSpeedScanner({ compact = false }: { compact?: boolean }) {
     setStatus("loading");
 
     try {
-      const params = new URLSearchParams({
-        url: normalized,
-        key: apiKey,
-        strategy: "mobile",
+      const res = await fetch(webhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: normalized }),
       });
-      // Multiple categories
-      ["performance", "accessibility", "seo"].forEach((c) => params.append("category", c));
 
-      const res = await fetch(`${PAGESPEED_ENDPOINT}?${params.toString()}`);
-      if (!res.ok) {
-        throw new Error(`PageSpeed API antwortete mit Status ${res.status}`);
+      const data: ScanResponse = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || `Der Scan ist fehlgeschlagen (Status ${res.status}).`);
       }
-      const data = await res.json();
-
-      const cats = data?.lighthouseResult?.categories ?? {};
-      const audits = data?.lighthouseResult?.audits ?? {};
-      const a11yRefs: { id: string; weight: number }[] =
-        cats.accessibility?.auditRefs?.filter((a: { weight: number }) => a.weight > 0) ?? [];
-
-      const failingA11y: AuditItem[] = a11yRefs
-        .map((ref) => audits[ref.id])
-        .filter((a) => a && typeof a.score === "number" && a.score < 1)
-        .slice(0, 6)
-        .map((a) => ({
-          id: a.id,
-          title: a.title,
-          score: a.score,
-          description: typeof a.description === "string" ? a.description.replace(/\[.*?\]\(.*?\)/g, "") : "",
-        }));
 
       setResult({
-        url: normalized,
-        scores: {
-          performance: scoreToPercent(cats.performance?.score),
-          accessibility: scoreToPercent(cats.accessibility?.score),
-          seo: scoreToPercent(cats.seo?.score),
-        },
-        failingA11y,
+        url: data.url ?? normalized,
+        score: typeof data.score === "number" ? data.score : null,
+        failedCount: data.failedCount ?? 0,
+        failedItems: data.failedItems ?? [],
+        reportId: data.reportId,
       });
       setStatus("success");
     } catch (err) {
@@ -157,7 +145,7 @@ export function PageSpeedScanner({ compact = false }: { compact?: boolean }) {
       </form>
 
       <p className="mt-3 text-xs text-muted-foreground">
-        Powered by Google PageSpeed Insights · Dauer: ca. 15–30 Sekunden
+        Automatisierter Accessibility-Scan · Dauer: ca. 15–40 Sekunden
       </p>
 
       {status === "error" && errorMsg && (
@@ -169,20 +157,23 @@ export function PageSpeedScanner({ compact = false }: { compact?: boolean }) {
 
       {status === "success" && result && (
         <div className="mt-6">
-          <div className="grid grid-cols-3 gap-3">
-            <ScoreRing label="Performance" value={result.scores.performance} />
-            <ScoreRing label="Barrierefreiheit" value={result.scores.accessibility} />
-            <ScoreRing label="SEO" value={result.scores.seo} />
+          <div className={compact ? "" : "mx-auto max-w-xs"}>
+            <ScoreRing value={result.score} />
           </div>
 
-          {result.failingA11y.length > 0 ? (
+          {result.failedItems.length > 0 ? (
             <div className="mt-6 rounded-xl border border-warning/30 bg-warning/5 p-5">
               <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
                 <ShieldAlert className="h-5 w-5 text-warning-foreground" aria-hidden />
                 Auffällige Barrierefreiheits-Punkte
+                {result.failedCount > result.failedItems.length && (
+                  <span className="font-normal text-muted-foreground">
+                    (Top {result.failedItems.length} von {result.failedCount})
+                  </span>
+                )}
               </div>
               <ul className="space-y-3">
-                {result.failingA11y.map((a) => (
+                {result.failedItems.map((a) => (
                   <li key={a.id} className="text-sm">
                     <div className="font-medium text-foreground">{a.title}</div>
                     {a.description && <div className="mt-1 text-muted-foreground">{a.description}</div>}

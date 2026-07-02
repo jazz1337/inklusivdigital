@@ -80,8 +80,8 @@ function BfsgCheckPage() {
               <h3 className="font-display text-xl font-bold text-foreground">Was der Check leistet</h3>
             </div>
             <ul className="space-y-3 text-muted-foreground">
-              <li>· Schneller technischer Scan deiner Startseite</li>
-              <li>· Erste Einschätzung zu Performance, Barrierefreiheit & SEO</li>
+              <li>· Schneller technischer Accessibility-Scan deiner Startseite</li>
+              <li>· Barrierefreiheits-Score nach WCAG 2.1 AA</li>
               <li>· Auflistung der häufigsten technisch erkennbaren Barrieren</li>
               <li>· Sofortiges Ergebnis, ohne Anmeldung</li>
             </ul>

