@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { showCookiePreferences } from "@/lib/consent";
 
 export function Footer() {
   return (
@@ -52,7 +53,15 @@ export function Footer() {
               { to: "/datenschutz", label: "Datenschutz" },
               { to: "/barrierefreiheitserklaerung", label: "Barrierefreiheitserklärung" },
             ]}
-          />
+          >
+            <button
+              type="button"
+              onClick={showCookiePreferences}
+              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Cookie-Einstellungen
+            </button>
+          </FooterCol>
         </div>
 
         <div className="mt-10 flex flex-col items-start justify-between gap-3 border-t border-border pt-6 text-xs text-muted-foreground md:flex-row md:items-center">
@@ -64,7 +73,15 @@ export function Footer() {
   );
 }
 
-function FooterCol({ title, links }: { title: string; links: { to: string; label: string }[] }) {
+function FooterCol({
+  title,
+  links,
+  children,
+}: {
+  title: string;
+  links: { to: string; label: string }[];
+  children?: React.ReactNode;
+}) {
   return (
     <div>
       <h3 className="text-sm font-semibold text-foreground">{title}</h3>
@@ -79,6 +96,7 @@ function FooterCol({ title, links }: { title: string; links: { to: string; label
             </Link>
           </li>
         ))}
+        {children && <li>{children}</li>}
       </ul>
     </div>
   );
