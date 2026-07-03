@@ -134,7 +134,7 @@
     {
       "parameters": {
         "authentication": "privateKey",
-        "command": "={{ 'lighthouse ' + $('Build Pending').first().json.urlShellQuoted + ' --only-categories=accessibility --output=json --chrome-flags=\"--headless --no-sandbox --disable-dev-shm-usage\" --quiet --max-wait-for-load=45000 2>/dev/null' }}"
+        "command": "={{ 'sudo -u lhscan -H lighthouse ' + $('Build Pending').first().json.urlShellQuoted + ' --only-categories=accessibility --output=json --chrome-flags=\"--headless --no-sandbox --disable-dev-shm-usage\" --quiet --max-wait-for-load=45000 2>/dev/null' }}"
       },
       "id": "n008-0000-4000-8000-000000000000",
       "name": "Lighthouse Scan",

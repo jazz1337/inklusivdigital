@@ -46,6 +46,16 @@ VITE_SCAN_UNLOCK_URL=https://n8n.jazzsleeps.org/webhook/bfsg-unlock
 VITE_SCAN_FULL_URL=https://n8n.jazzsleeps.org/webhook/bfsg-full
 ```
 
-## Bekannte offene Punkte (wie in v1)
+## SSRF-Absicherung (vor voll-öffentlichem Betrieb)
 
-- **SSRF via DNS-Rebinding**: Die URL-Validierung prüft nur den Hostname-String, nicht die tatsächlich aufgelöste IP. Für einen voll-öffentlichen Betrieb sollte eine Egress-Firewall auf dem Scan-Server private/interne Zielbereiche für den Chrome-/Lighthouse-Prozess sperren.
+Die URL-Validierung prüft nur den Hostname-String, nicht die tatsächlich aufgelöste IP — eine öffentlich aussehende Domain mit internem DNS-Eintrag käme sonst durch. Zusätzlich lief Lighthouse bislang als `root`, was für einen Browser, der fremde Seiten öffnet, ohnehin riskant ist.
+
+**Lösung (einmalig auf dem Hetzner-/Ubuntu-Server als root ausführen):**
+
+```bash
+sudo bash server/harden-scan-egress.sh
+```
+
+Das Skript legt einen abgeschotteten Benutzer `lhscan` an, prüft dass Lighthouse als dieser läuft, sperrt per iptables **nur für lhscan** den Weg zu allen internen/privaten Adressbereichen (RFC1918, Loopback, Link-Local inkl. `169.254.169.254`, CGNAT — DNS bleibt erlaubt) und persistiert die Regeln über Reboots. Root und n8n bleiben unberührt; ein Aussperren ist praktisch ausgeschlossen.
+
+Der `Lighthouse Scan`-Node in `bfsg-scan-v2.json` startet den Scan bereits mit `sudo -u lhscan -H lighthouse …` — nach dem Skript-Lauf greift der Schutz also automatisch. (Voraussetzung: `root` darf ohne Passwort zu `lhscan` wechseln, was standardmäßig der Fall ist.)
