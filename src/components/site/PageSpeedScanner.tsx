@@ -1,31 +1,12 @@
 import { useState, type FormEvent } from "react";
-import { AlertCircle, CheckCircle2, Gauge, Loader2, Search, ShieldAlert } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
+import { AlertCircle, Gauge, Loader2, Search } from "lucide-react";
 
-type Status = "idle" | "loading" | "success" | "error";
-
-type FailedItem = {
-  id: string;
-  title: string;
-  description?: string;
-};
+type Status = "idle" | "submitting" | "error";
 
 type ScanResponse = {
   success: boolean;
   error?: string;
-  reportId?: string;
-  url?: string;
-  score?: number | null;
-  failedCount?: number;
-  passedCount?: number;
-  manualCount?: number;
-  failedItems?: FailedItem[];
-};
-
-type Result = {
-  url: string;
-  score: number | null;
-  failedCount: number;
-  failedItems: FailedItem[];
   reportId?: string;
 };
 
@@ -41,31 +22,15 @@ function normalizeUrl(input: string): string | null {
   }
 }
 
-function ScoreRing({ value }: { value: number | null }) {
-  const v = value ?? 0;
-  const tone = v >= 90 ? "text-success" : v >= 50 ? "text-warning" : "text-destructive";
-  return (
-    <div className="flex flex-col items-center gap-1 rounded-xl border border-border bg-card p-4 sm:gap-2 sm:p-6">
-      <div className={`text-3xl font-bold sm:text-4xl ${tone}`} aria-hidden>
-        {value ?? "—"}
-      </div>
-      <div className="text-center text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        Barrierefreiheits-Score
-      </div>
-    </div>
-  );
-}
-
 export function PageSpeedScanner({ compact = false }: { compact?: boolean }) {
+  const navigate = useNavigate();
   const [url, setUrl] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [result, setResult] = useState<Result | null>(null);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setErrorMsg(null);
-    setResult(null);
 
     const webhookUrl = import.meta.env.VITE_SCAN_WEBHOOK_URL as string | undefined;
     if (!webhookUrl || webhookUrl.trim() === "") {
@@ -81,7 +46,7 @@ export function PageSpeedScanner({ compact = false }: { compact?: boolean }) {
       return;
     }
 
-    setStatus("loading");
+    setStatus("submitting");
 
     try {
       const res = await fetch(webhookUrl, {
@@ -89,21 +54,14 @@ export function PageSpeedScanner({ compact = false }: { compact?: boolean }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: normalized }),
       });
-
       const data: ScanResponse = await res.json();
 
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || `Der Scan ist fehlgeschlagen (Status ${res.status}).`);
+      if (!res.ok || !data.success || !data.reportId) {
+        throw new Error(data.error || `Der Scan konnte nicht gestartet werden (Status ${res.status}).`);
       }
 
-      setResult({
-        url: data.url ?? normalized,
-        score: typeof data.score === "number" ? data.score : null,
-        failedCount: data.failedCount ?? 0,
-        failedItems: data.failedItems ?? [],
-        reportId: data.reportId,
-      });
-      setStatus("success");
+      // Sofortiger Wechsel zur Report-Seite, die den Fortschritt pollt
+      navigate({ to: "/audit/$reportId", params: { reportId: data.reportId } });
     } catch (err) {
       setStatus("error");
       setErrorMsg(err instanceof Error ? err.message : "Unbekannter Fehler beim Scan.");
@@ -123,18 +81,18 @@ export function PageSpeedScanner({ compact = false }: { compact?: boolean }) {
             placeholder="https://deine-website.de"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            disabled={status === "loading"}
+            disabled={status === "submitting"}
             className="h-14 w-full rounded-xl border border-input bg-background pl-12 pr-4 text-base text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
         <button
           type="submit"
-          disabled={status === "loading"}
+          disabled={status === "submitting"}
           className="inline-flex h-14 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-base font-semibold text-primary-foreground shadow-[var(--shadow-soft)] transition hover:bg-primary/90 hover:shadow-[var(--shadow-glow)] disabled:opacity-60"
         >
-          {status === "loading" ? (
+          {status === "submitting" ? (
             <>
-              <Loader2 className="h-5 w-5 animate-spin" aria-hidden /> Prüfe…
+              <Loader2 className="h-5 w-5 animate-spin" aria-hidden /> Starte…
             </>
           ) : (
             <>
@@ -152,45 +110,6 @@ export function PageSpeedScanner({ compact = false }: { compact?: boolean }) {
         <div role="alert" className="mt-5 flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
           <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden />
           <p>{errorMsg}</p>
-        </div>
-      )}
-
-      {status === "success" && result && (
-        <div className="mt-6">
-          <div className={compact ? "" : "mx-auto max-w-xs"}>
-            <ScoreRing value={result.score} />
-          </div>
-
-          {result.failedItems.length > 0 ? (
-            <div className="mt-6 rounded-xl border border-warning/30 bg-warning/5 p-5">
-              <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
-                <ShieldAlert className="h-5 w-5 text-warning-foreground" aria-hidden />
-                Auffällige Barrierefreiheits-Punkte
-                {result.failedCount > result.failedItems.length && (
-                  <span className="font-normal text-muted-foreground">
-                    (Top {result.failedItems.length} von {result.failedCount})
-                  </span>
-                )}
-              </div>
-              <ul className="space-y-3">
-                {result.failedItems.map((a) => (
-                  <li key={a.id} className="text-sm">
-                    <div className="font-medium text-foreground">{a.title}</div>
-                    {a.description && <div className="mt-1 text-muted-foreground">{a.description}</div>}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : (
-            <div className="mt-6 flex items-center gap-3 rounded-xl border border-success/30 bg-success/5 p-4 text-sm">
-              <CheckCircle2 className="h-5 w-5 text-success" aria-hidden />
-              <span>Keine offensichtlichen Barrierefreiheits-Probleme gefunden – ein vollständiges Audit deckt jedoch noch tiefere Schichten auf.</span>
-            </div>
-          )}
-
-          <p className="mt-4 text-xs text-muted-foreground">
-            Hinweis: Automatisierte Tests erkennen ca. 30 % aller Barrieren. Für rechtliche Sicherheit ist ein manuelles Audit erforderlich.
-          </p>
         </div>
       )}
     </div>
