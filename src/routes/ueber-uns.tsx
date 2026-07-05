@@ -84,9 +84,10 @@ function UeberUnsPage() {
             />
             <div className="mt-6 space-y-4 text-muted-foreground">
               <p>
-                Als E-Commerce-Kaufleute haben wir jahrelang Online-Shops aufgebaut, optimiert
-                und skaliert. Dabei sind wir immer wieder auf dasselbe Problem gestoßen:
-                Barrierefreiheit wurde als lästige Pflicht behandelt – oder komplett ignoriert.
+                Wir kommen aus E-Commerce, Automatisierung und KI – mit echtem Praxisbezug an
+                Online-Shops und dem Antrieb, Dinge umzusetzen statt nur darüber zu reden. Dabei ist
+                uns immer wieder dasselbe begegnet: Barrierefreiheit wurde als lästige Pflicht
+                behandelt – oder komplett ignoriert.
               </p>
               <p>
                 Mit dem BFSG ändert sich das. Shops, die nicht konform sind, riskieren
@@ -136,22 +137,22 @@ function UeberUnsPage() {
       <Section>
         <SectionHeading
           eyebrow="Das Team"
-          title="Zwei Kaufleute. Ein Ziel."
+          title="Zwei Gründer. Ein Ziel."
           intro="Kein aufgeblähtes Agentur-Team. Ihr habt immer direkt einen von uns am Apparat."
           align="center"
         />
         <div className="mt-12 grid gap-6 sm:grid-cols-2 max-w-2xl mx-auto">
           <TeamCard
-            initials="JA"
-            name="[Vorname] [Nachname]"
-            role="Gründer – E-Commerce & BFSG-Strategie"
-            focus={["Online-Shop-Optimierung", "BFSG-Compliance", "Shopify / WooCommerce"]}
+            initials="JP"
+            name="Jazz Paulikat"
+            role="Gründer – Automatisierung & KI"
+            focus={["n8n & Workflow-Automatisierung", "KI-Integration", "Technische Umsetzung"]}
           />
           <TeamCard
-            initials="MK"
-            name="[Vorname] [Nachname]"
-            role="Gründer – Automatisierung & KI"
-            focus={["Workflow-Automatisierung", "KI-Integration", "Technische Umsetzung"]}
+            initials="BP"
+            name="Ben Priller"
+            role="Gründer – E-Commerce & Shopify"
+            focus={["Shopify-Umsetzung", "Online-Shop-Optimierung", "BFSG-Compliance"]}
           />
         </div>
       </Section>
@@ -203,7 +204,7 @@ function UeberUnsPage() {
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-base text-white/60">
             Kein langes Hin und Her. Schreib uns kurz was du brauchst –
-            wir melden uns innerhalb von 24 Stunden.
+            wir melden uns innerhalb von 48 Stunden.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
             <Link
@@ -284,7 +285,7 @@ const EXPERTISE = [
   {
     icon: ShoppingBag,
     title: "E-Commerce",
-    text: "Shopify, WooCommerce, Magento – wir kennen die Plattformen und ihre Tücken aus eigener Erfahrung.",
+    text: "Shopify ist unsere Kernplattform – dazu WooCommerce und weitere gängige Shop-Systeme. Wir kennen die Technik und ihre Tücken aus der Praxis.",
   },
   {
     icon: Scale,
