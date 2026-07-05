@@ -114,9 +114,13 @@ export function AuditDashboard({
             </div>
           )
         ) : (
-          <div className="relative overflow-hidden rounded-2xl border border-border">
-            {/* Angedeutete, unscharfe Platzhalter-Zeilen hinter dem Gate */}
-            <div aria-hidden className="space-y-3 p-5 blur-sm select-none">
+          <div className="grid overflow-hidden rounded-2xl border border-border">
+            {/* Beide Layer liegen in derselben Grid-Zelle übereinander (statt absolute
+                Positionierung auf feste Höhe) – so richtet sich die Höhe des Containers
+                immer nach dem GRÖSSEREN der beiden Layer. Wächst das Formular (z. B. durch
+                eine Fehlermeldung), wächst der Container mit, statt das Formular auf die
+                feste Platzhalter-Höhe zu zwingen und dabei Inhalte abzuschneiden. */}
+            <div aria-hidden className="col-start-1 row-start-1 space-y-3 p-5 blur-sm select-none">
               {[0, 1, 2].map((i) => (
                 <div key={i} className="rounded-xl border border-border bg-card p-4">
                   <div className="h-4 w-2/3 rounded bg-muted" />
@@ -124,7 +128,7 @@ export function AuditDashboard({
                 </div>
               ))}
             </div>
-            <div className="absolute inset-0 flex items-center justify-center bg-card/70 p-6 backdrop-blur-[2px]">
+            <div className="col-start-1 row-start-1 flex items-center justify-center bg-card/70 p-6 backdrop-blur-[2px]">
               <div className="w-full max-w-md text-center">
                 <div className="mx-auto mb-3 grid h-11 w-11 place-items-center rounded-full bg-primary/10 text-primary">
                   <Lock className="h-5 w-5" aria-hidden />
