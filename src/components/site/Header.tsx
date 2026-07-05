@@ -40,21 +40,46 @@ const NAV: NavItem[] = [
   { type: "link", to: "/ueber-uns", label: "Über uns" },
 ];
 
+// Kurze Verzögerung beim Schließen verhindert, dass eine ungenaue Mausbewegung
+// zwischen Button und Panel (der kleine Abstand durch "mt-1") das Dropdown
+// vorzeitig zuklappt, bevor der Cursor das Panel erreicht hat.
+const CLOSE_DELAY_MS = 150;
+
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const cancelScheduledClose = () => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+  };
+  const openNow = (label: string) => {
+    cancelScheduledClose();
+    setOpenDropdown(label);
+  };
+  const scheduleClose = () => {
+    cancelScheduledClose();
+    closeTimerRef.current = setTimeout(() => setOpenDropdown(null), CLOSE_DELAY_MS);
+  };
+  const closeNow = () => {
+    cancelScheduledClose();
+    setOpenDropdown(null);
+  };
 
   // Close dropdowns on outside click
   useEffect(() => {
     function onClick(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setOpenDropdown(null);
+        closeNow();
       }
     }
     function onEsc(e: KeyboardEvent) {
       if (e.key === "Escape") {
-        setOpenDropdown(null);
+        closeNow();
         setMobileOpen(false);
       }
     }
@@ -63,6 +88,7 @@ export function Header() {
     return () => {
       document.removeEventListener("mousedown", onClick);
       document.removeEventListener("keydown", onEsc);
+      cancelScheduledClose();
     };
   }, []);
 
@@ -95,8 +121,12 @@ export function Header() {
                 key={item.label}
                 item={item}
                 isOpen={openDropdown === item.label}
-                onToggle={() => setOpenDropdown(openDropdown === item.label ? null : item.label)}
-                onClose={() => setOpenDropdown(null)}
+                onOpen={() => openNow(item.label)}
+                onScheduleClose={scheduleClose}
+                onCancelScheduledClose={cancelScheduledClose}
+                onToggleViaKeyboard={() =>
+                  openDropdown === item.label ? closeNow() : openNow(item.label)
+                }
               />
             ),
           )}
@@ -155,16 +185,20 @@ export function Header() {
 function DesktopDropdown({
   item,
   isOpen,
-  onToggle,
-  onClose,
+  onOpen,
+  onScheduleClose,
+  onCancelScheduledClose,
+  onToggleViaKeyboard,
 }: {
   item: Extract<NavItem, { type: "dropdown" }>;
   isOpen: boolean;
-  onToggle: () => void;
-  onClose: () => void;
+  onOpen: () => void;
+  onScheduleClose: () => void;
+  onCancelScheduledClose: () => void;
+  onToggleViaKeyboard: () => void;
 }) {
   return (
-    <div className="relative" onMouseEnter={onToggle} onMouseLeave={onClose}>
+    <div className="relative" onMouseEnter={onOpen} onMouseLeave={onScheduleClose}>
       <button
         className={cn(
           "inline-flex items-center gap-1 rounded-md px-3 py-2 text-sm font-medium text-foreground/80 transition-colors hover:bg-secondary hover:text-foreground",
@@ -172,7 +206,14 @@ function DesktopDropdown({
         )}
         aria-expanded={isOpen}
         aria-haspopup="true"
-        onClick={onToggle}
+        onClick={(e) => {
+          // event.detail ist 0 bei per Tastatur (Enter/Leertaste) ausgelösten Klicks,
+          // sonst die Klickanzahl. So kann Tastatur-Bedienung das Menü toggeln, ohne
+          // dass ein echter Mausklick ein per Hover bereits geöffnetes Menü sofort
+          // wieder zuklappt.
+          if (e.detail === 0) onToggleViaKeyboard();
+          else onOpen();
+        }}
       >
         {item.label}
         <ChevronDown className={cn("h-4 w-4 transition-transform", isOpen && "rotate-180")} aria-hidden />
@@ -181,6 +222,8 @@ function DesktopDropdown({
         <div
           role="menu"
           className="absolute left-0 top-full z-50 mt-1 w-80 overflow-hidden rounded-xl border border-border bg-popover p-2 shadow-[var(--shadow-card)]"
+          onMouseEnter={onCancelScheduledClose}
+          onMouseLeave={onScheduleClose}
         >
           {item.items.map((sub) => (
             <Link
@@ -188,7 +231,7 @@ function DesktopDropdown({
               to={sub.to}
               role="menuitem"
               className="block rounded-lg px-3 py-2.5 transition-colors hover:bg-secondary"
-              onClick={onClose}
+              onClick={onScheduleClose}
             >
               <div className="font-semibold text-foreground">{sub.label}</div>
               {sub.description && (
