@@ -35,14 +35,14 @@ export function PageSpeedScanner({ compact = false }: { compact?: boolean }) {
     const webhookUrl = import.meta.env.VITE_SCAN_WEBHOOK_URL as string | undefined;
     if (!webhookUrl || webhookUrl.trim() === "") {
       setStatus("error");
-      setErrorMsg("Der Schnelltest ist aktuell nicht konfiguriert. Bitte versuche es später erneut.");
+      setErrorMsg("Der Schnelltest ist gerade nicht verfügbar. Bitte versuch es in Kürze noch einmal.");
       return;
     }
 
     const normalized = normalizeUrl(url);
     if (!normalized) {
       setStatus("error");
-      setErrorMsg("Bitte gib eine gültige URL ein (z. B. https://deine-domain.de).");
+      setErrorMsg("Bitte gib eine gültige Website-Adresse ein – zum Beispiel deine-firma.de.");
       return;
     }
 
@@ -54,17 +54,34 @@ export function PageSpeedScanner({ compact = false }: { compact?: boolean }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: normalized }),
       });
-      const data: ScanResponse = await res.json();
 
-      if (!res.ok || !data.success || !data.reportId) {
-        throw new Error(data.error || `Der Scan konnte nicht gestartet werden (Status ${res.status}).`);
+      // Antwort defensiv einlesen – falls der Server nichts/kein JSON liefert,
+      // soll das nicht als technischer Fehler ("Unexpected end of JSON input")
+      // beim Nutzer landen.
+      let data: ScanResponse | null = null;
+      try {
+        data = await res.json();
+      } catch {
+        data = null;
+      }
+
+      if (!res.ok || !data?.success || !data.reportId) {
+        setStatus("error");
+        // Wenn der Server eine verständliche Rückmeldung schickt (z. B. „bitte
+        // eine öffentlich erreichbare Adresse angeben"), diese zeigen – sonst
+        // eine allgemeine, freundliche Meldung.
+        setErrorMsg(
+          data?.error ||
+            "Diese Website konnten wir gerade nicht prüfen. Bitte kontrollier die Adresse und versuch es noch einmal.",
+        );
+        return;
       }
 
       // Sofortiger Wechsel zur Report-Seite, die den Fortschritt pollt
       navigate({ to: "/audit/$reportId", params: { reportId: data.reportId } });
-    } catch (err) {
+    } catch {
       setStatus("error");
-      setErrorMsg(err instanceof Error ? err.message : "Unbekannter Fehler beim Scan.");
+      setErrorMsg("Der Schnelltest hat gerade nicht geklappt. Bitte versuch es in einem Moment noch einmal.");
     }
   }
 

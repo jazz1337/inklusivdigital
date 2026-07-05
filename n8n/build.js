@@ -46,12 +46,12 @@ const SECURE_ID_FN = `function secureId() {
 const VALIDATE_SCAN = `// Validate & Normalize URL (regex-only, keine URL-Klasse -- s. bisheriger Fix)
 const raw = ($json.body && $json.body.url ? String($json.body.url) : '').trim();
 function fail(reason) { return [{ json: { valid: false, reason } }]; }
-if (!raw) return fail('Keine URL angegeben.');
-if (raw.length > 512) return fail('URL ist zu lang.');
+if (!raw) return fail('Bitte gib die Adresse deiner Website ein.');
+if (raw.length > 512) return fail('Diese Adresse ist zu lang. Bitte prüf deine Eingabe.');
 let s = /^https?:\\/\\//i.test(raw) ? raw : 'https://' + raw;
 s = s.split('#')[0].split('?')[0];
 const m = s.match(/^(https?):\\/\\/([a-z0-9.-]+)(?::(\\d{1,5}))?(\\/[A-Za-z0-9\\-._~/]*)?$/i);
-if (!m) return fail('Das ist keine gueltige URL oder enthaelt nicht unterstuetzte Zeichen.');
+if (!m) return fail('Das sieht nicht nach einer gültigen Website-Adresse aus. Bitte prüf deine Eingabe.');
 const hostname = m[2].toLowerCase();
 const port = m[3];
 const pathname = m[4] || '';
@@ -62,7 +62,7 @@ if (ipv4) {
   const a = parseInt(ipv4[1], 10), b = parseInt(ipv4[2], 10);
   priv = a === 127 || a === 10 || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || (a === 169 && b === 254) || (a === 100 && b >= 64 && b <= 127) || a === 0 || a >= 224;
 }
-if (isLocalName || priv) return fail('Bitte gib eine oeffentlich erreichbare Website-URL an.');
+if (isLocalName || priv) return fail('Bitte gib die öffentliche Adresse deiner Website an – interne oder lokale Adressen können wir nicht prüfen.');
 const safeUrl = 'https://' + hostname + (port ? ':' + port : '') + (pathname !== '/' ? pathname : '');
 const shellQuoted = "'" + safeUrl.replace(/'/g, "'\\\\''") + "'";
 ${SECURE_ID_FN}
@@ -121,12 +121,12 @@ const DISPOSABLE = ${JSON.stringify(DISPOSABLE)};
 const id = ($json.body && $json.body.reportId ? String($json.body.reportId) : '').trim();
 const email = ($json.body && $json.body.email ? String($json.body.email) : '').trim().toLowerCase();
 if (!/^[0-9a-f-]{36}$/.test(id)) return [{ json: { ok: false, reason: 'Ungueltige Report-ID.' } }];
-if (email.length > 254 || !/^[^\\s@]+@([^\\s@.]+\\.)+[^\\s@.]{2,}$/.test(email)) return [{ json: { ok: false, reason: 'Bitte gib eine gueltige E-Mail-Adresse ein.' } }];
+if (email.length > 254 || !/^[^\\s@]+@([^\\s@.]+\\.)+[^\\s@.]{2,}$/.test(email)) return [{ json: { ok: false, reason: 'Bitte gib eine gültige E-Mail-Adresse ein.' } }];
 const domain = email.split('@')[1];
 // Domain-Zeichen strikt whitelisten -- verhindert, dass Sonderzeichen (&, ?, #, %)
 // aus der Adresse in die DNS-over-HTTPS-Query (MX Lookup) geschleust werden.
-if (!/^[a-z0-9.-]+$/.test(domain)) return [{ json: { ok: false, reason: 'Bitte gib eine gueltige E-Mail-Adresse ein.' } }];
-if (DISPOSABLE.includes(domain)) return [{ json: { ok: false, reason: 'Wegwerf-E-Mail-Adressen sind nicht erlaubt. Bitte nutze deine geschaeftliche Adresse.' } }];
+if (!/^[a-z0-9.-]+$/.test(domain)) return [{ json: { ok: false, reason: 'Bitte gib eine gültige E-Mail-Adresse ein.' } }];
+if (DISPOSABLE.includes(domain)) return [{ json: { ok: false, reason: 'Bitte nutze deine geschäftliche E-Mail-Adresse – Wegwerf-Adressen können wir nicht akzeptieren.' } }];
 return [{ json: { ok: true, reportId: id, email, emailDomain: domain } }];`;
 
 const CHECK_MX = `// MX-Records aus der DNS-over-HTTPS-Antwort (dns.google) auswerten
@@ -303,11 +303,11 @@ nodes.push(respond('Fehler (Unlock-Input)', 400, '={{ { success: false, error: $
 nodes.push(httpGet('MX Lookup (DoH)', "=https://dns.google/resolve?name={{ $json.emailDomain }}&type=MX", 660, 1000));
 nodes.push(code('Check MX', CHECK_MX, 880, 1000));
 nodes.push(ifBool('MX vorhanden?', '={{ $json.hasMx }}', 1100, 1000));
-nodes.push(respond('Fehler (kein MX)', 400, '={{ { success: false, error: "Fuer diese E-Mail-Domain existiert kein Mailserver. Bitte pruefe die Adresse." } }}', 1320, 1160));
+nodes.push(respond('Fehler (kein MX)', 400, '={{ { success: false, error: "An diese E-Mail-Adresse können wir nichts zustellen. Bitte prüf die Schreibweise." } }}', 1320, 1160));
 nodes.push(ssh('Read Full For Unlock', "={{ 'cat " + REPORTS_DIR + "/' + $('Validate Unlock Input').first().json.reportId + '.json 2>/dev/null || echo \\'{}\\'' }}", 1320, 1000));
 nodes.push(code('Build Unlock', BUILD_UNLOCK, 1540, 1000));
 nodes.push(ifBool('Report noch da?', '={{ !$json.expired }}', 1760, 1000));
-nodes.push(respond('Fehler (Report abgelaufen)', 410, '={{ { success: false, error: "Dieser Schnelltest ist abgelaufen. Bitte starte einen neuen Scan." } }}', 1980, 1160));
+nodes.push(respond('Fehler (Report abgelaufen)', 410, '={{ { success: false, error: "Dieser Schnelltest ist abgelaufen. Bitte starte einfach einen neuen." } }}', 1980, 1160));
 nodes.push(ssh('Write Full Copy', "={{ 'mkdir -p " + REPORTS_DIR + "/full && echo ' + $json.fullB64 + ' | base64 -d > " + REPORTS_DIR + "/full/' + $json.token + '.json && echo ' + $json.leadB64 + ' | base64 -d >> " + REPORTS_DIR + "/leads.csv' }}", 1980, 1000));
 nodes.push(gmail(
   'Send Report Email',
