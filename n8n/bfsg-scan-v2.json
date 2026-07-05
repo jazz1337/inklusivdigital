@@ -119,7 +119,7 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ { success: true, reportId: $json.reportId, url: $json.url } }}",
+        "responseBody": "={{ { success: true, reportId: $('Build Pending').first().json.reportId, url: $('Build Pending').first().json.url } }}",
         "options": {}
       },
       "id": "n007-0000-4000-8000-000000000000",
