@@ -15,6 +15,12 @@ Der Workflow `bfsg-scan-v2.json` ersetzt `bfsg-scan-webhook.json`. Er bündelt *
 - **Gmail-Credential**: Der Node **„Send Report Email"** referenziert `REPLACE_WITH_YOUR_GMAIL_CREDENTIAL`. Nach dem Import einmal den Node öffnen und deine Gmail-OAuth-Verbindung (Scope „E-Mail senden") auswählen. Alternativ den Gmail-Node durch einen SMTP-/„Send Email"-Node ersetzen, falls der Versand über eure eigene Domain laufen soll (empfohlen für Zustellbarkeit).
 - Workflow **aktivieren** (Toggle oben rechts), sonst antworten die `/webhook/`-URLs nicht.
 
+## E-Mail-Format
+
+Der Node „Send Report Email" verschickt seit dem Redesign eine **HTML-E-Mail** (`emailType: 'html'`) statt reinem Text — Tabellen-Layout mit Logo, Score-Anzeige und farbigen Kennzahl-Kacheln, passend zum Dashboard-Design. Der komplette HTML-Aufbau lebt im `BUILD_UNLOCK`-Code-Node (`n8n/build.js`), **nicht** direkt in der generierten `bfsg-scan-v2.json` editieren — Änderungen immer über `node n8n/build.js` neu generieren.
+
+Abhängigkeit: `public/logo-email.png` (verkleinerte, ~163KB-Variante von `logo.png`, via `SITE_LOGO_URL` in `build.js` referenziert) muss auf GitHub Pages live sein, damit das Logo in der E-Mail lädt. Beim Domain-Umzug auf `inklusivdigital.de` wird das automatisch mit `SITE_BASE` mitgezogen (keine separate Anpassung nötig).
+
 ## Server-Setup (einmalig)
 
 Die Reports liegen unter `$HOME/bfsg-reports` des SSH-Users — **bewusst außerhalb jedes Web-Docroots** (`/var/www`, `/srv/www` o. ä.). Das ist die eigentliche Vertrauensgrenze: Läge das Verzeichnis in einem Docroot, könnte man den Voll-Report per direktem GET (`…/reports/<reportId>.json`) am E-Mail-Gate vorbei laden. Die `mkdir -p`-Befehle im Workflow legen das Verzeichnis selbst an; da es im Home liegt, sind keine Sonderrechte nötig. Alle Lesezugriffe laufen ausschließlich über die Webhooks, die die Daten projizieren — keine nginx-Konfiguration erforderlich.

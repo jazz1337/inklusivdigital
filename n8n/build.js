@@ -23,6 +23,7 @@ const SSH_CRED = { sshPrivateKey: { id: 'DAjiQBL7pUMlOqHe', name: 'SSH Private K
 // $HOME wird von der Remote-Shell expandiert und ist garantiert schreibbar.
 const REPORTS_DIR = '$HOME/bfsg-reports';
 const SITE_BASE = 'https://jazz1337.github.io/inklusivdigital'; // TODO: auf https://inklusivdigital.de umstellen beim Domain-Umzug
+const SITE_LOGO_URL = SITE_BASE + '/logo-email.png';
 
 // CSPRNG-UUID mit Fallback: bevorzugt crypto (kryptografisch sicher), faellt aber
 // nicht aus, falls die n8n-Sandbox `crypto` nicht als Global bereitstellt (wie
@@ -147,7 +148,58 @@ const link = '${SITE_BASE}/audit/full/' + token;
 const clean = (s) => String(s || '').replace(/[",\\r\\n]/g, ' ');
 const leadLine = [new Date().toISOString(), clean(meta.email), clean(full.url), full.score, token].join(',');
 const leadB64 = Buffer.from(leadLine + '\\n', 'utf-8').toString('base64');
-return [{ json: { token, fullB64, leadB64, link, email: meta.email, url: full.url, score: full.score, failedCount: full.failedCount } }];`;
+
+// HTML-E-Mail (Tabellen-Layout fuer Email-Client-Kompatibilitaet, Farben als Hex
+// da Email-Clients kein oklch/CSS-Variablen unterstuetzen). full.url ist bereits
+// serverseitig auf ein enges Zeichen-Whitelist geprueft (VALIDATE_SCAN), escapeHtml
+// bleibt trotzdem als defensive Absicherung stehen.
+function escapeHtml(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+const score = full.score;
+let scoreColor = '#DF2225', scoreLabel = 'Kritisch';
+if (score >= 90) { scoreColor = '#00A159'; scoreLabel = 'Gut'; }
+else if (score >= 70) { scoreColor = '#E9AB2B'; scoreLabel = 'Befriedigend'; }
+else if (score >= 50) { scoreColor = '#E9AB2B'; scoreLabel = 'Verbesserungsbedarf'; }
+const safeUrl = escapeHtml(full.url);
+const emailHtml = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>'
+  + '<body style="margin:0;padding:0;background:#EBF5FF;font-family:Arial,Helvetica,sans-serif;">'
+  + '<span style="display:none;max-height:0;overflow:hidden;opacity:0;">Dein BFSG-Bericht fuer ' + safeUrl + ' ist da: ' + score + '/100 Punkte.</span>'
+  + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#EBF5FF;"><tr><td align="center" style="padding:24px 12px;">'
+  + '<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;">'
+  + '<tr><td style="background:#ffffff;padding:28px 24px 20px;text-align:center;">'
+  + '<img src="${SITE_LOGO_URL}" width="160" alt="InklusivDigital" style="display:block;margin:0 auto;border:0;max-width:160px;height:auto;" />'
+  + '</td></tr>'
+  + '<tr><td style="height:4px;line-height:4px;font-size:0;background:#0050B5;">&nbsp;</td></tr>'
+  + '<tr><td style="padding:32px 32px 8px;text-align:center;">'
+  + '<table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;"><tr><td style="border:8px solid ' + scoreColor + '22;border-radius:999px;padding:16px 32px;text-align:center;">'
+  + '<span style="font-size:40px;font-weight:bold;color:' + scoreColor + ';font-family:Arial,Helvetica,sans-serif;">' + score + '</span>'
+  + '<span style="font-size:14px;color:#5A6472;"> / 100</span>'
+  + '</td></tr></table>'
+  + '<p style="margin:12px 0 0;font-weight:bold;color:' + scoreColor + ';font-size:16px;">' + scoreLabel + '</p>'
+  + '<p style="color:#5A6472;font-size:14px;margin:6px 0 0;">Geprueft: ' + safeUrl + '</p>'
+  + '</td></tr>'
+  + '<tr><td style="padding:8px 32px 24px;">'
+  + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>'
+  + '<td width="33%" align="center" style="background:#DF222511;border-radius:12px;padding:14px 6px;"><span style="font-size:22px;font-weight:bold;color:#DF2225;">' + full.failedCount + '</span><br/><span style="font-size:11px;color:#5A6472;">Kritische Fehler</span></td>'
+  + '<td width="2%">&nbsp;</td>'
+  + '<td width="33%" align="center" style="background:#00A15911;border-radius:12px;padding:14px 6px;"><span style="font-size:22px;font-weight:bold;color:#00A159;">' + full.passedCount + '</span><br/><span style="font-size:11px;color:#5A6472;">Bestanden</span></td>'
+  + '<td width="2%">&nbsp;</td>'
+  + '<td width="33%" align="center" style="background:#E9AB2B11;border-radius:12px;padding:14px 6px;"><span style="font-size:22px;font-weight:bold;color:#E9AB2B;">' + full.manualCount + '</span><br/><span style="font-size:11px;color:#5A6472;">Manuell pruefen</span></td>'
+  + '</tr></table>'
+  + '</td></tr>'
+  + '<tr><td align="center" style="padding:8px 32px 32px;">'
+  + '<table role="presentation" cellpadding="0" cellspacing="0"><tr><td bgcolor="#0050B5" style="border-radius:8px;">'
+  + '<a href="' + link + '" style="display:inline-block;padding:14px 28px;color:#ffffff;font-weight:bold;text-decoration:none;font-size:15px;font-family:Arial,Helvetica,sans-serif;">Vollstaendigen Bericht ansehen</a>'
+  + '</td></tr></table>'
+  + '<p style="color:#5A6472;font-size:12px;margin-top:16px;">Der Link ist 7 Tage gueltig.</p>'
+  + '</td></tr>'
+  + '<tr><td style="background:#EBF5FF;padding:20px 32px;text-align:center;color:#5A6472;font-size:12px;">'
+  + 'InklusivDigital &middot; Fragen? Einfach auf diese Mail antworten.'
+  + '</td></tr>'
+  + '</table>'
+  + '</td></tr></table>'
+  + '</body></html>';
+
+return [{ json: { token, fullB64, leadB64, link, email: meta.email, url: full.url, score: full.score, failedCount: full.failedCount, passedCount: full.passedCount, manualCount: full.manualCount, emailHtml } }];`;
 
 const VALIDATE_TOKEN = `// Token strikt whitelisten vor dem cat-Befehl
 const t = ($json.body && $json.body.token ? String($json.body.token) : '').trim();
@@ -185,7 +237,7 @@ function httpGet(name, url, x, y) {
   return { parameters: { url, options: {} }, id: nid(), name, type: 'n8n-nodes-base.httpRequest', typeVersion: 4.2, position: [x, y] };
 }
 function gmail(name, to, subject, message, x, y) {
-  return { parameters: { sendTo: to, subject, message, options: {} }, id: nid(), name, type: 'n8n-nodes-base.gmail', typeVersion: 2, position: [x, y], webhookId: 'gmail-' + nid(), credentials: { gmailOAuth2: { id: 'REPLACE_WITH_YOUR_GMAIL_CREDENTIAL', name: 'Gmail account' } } };
+  return { parameters: { sendTo: to, subject, message, emailType: 'html', options: {} }, id: nid(), name, type: 'n8n-nodes-base.gmail', typeVersion: 2, position: [x, y], webhookId: 'gmail-' + nid(), credentials: { gmailOAuth2: { id: 'REPLACE_WITH_YOUR_GMAIL_CREDENTIAL', name: 'Gmail account' } } };
 }
 
 const nodes = [];
@@ -257,7 +309,13 @@ nodes.push(code('Build Unlock', BUILD_UNLOCK, 1540, 1000));
 nodes.push(ifBool('Report noch da?', '={{ !$json.expired }}', 1760, 1000));
 nodes.push(respond('Fehler (Report abgelaufen)', 410, '={{ { success: false, error: "Dieser Schnelltest ist abgelaufen. Bitte starte einen neuen Scan." } }}', 1980, 1160));
 nodes.push(ssh('Write Full Copy', "={{ 'mkdir -p " + REPORTS_DIR + "/full && echo ' + $json.fullB64 + ' | base64 -d > " + REPORTS_DIR + "/full/' + $json.token + '.json && echo ' + $json.leadB64 + ' | base64 -d >> " + REPORTS_DIR + "/leads.csv' }}", 1980, 1000));
-nodes.push(gmail('Send Report Email', "={{ $('Build Unlock').first().json.email }}", "={{ 'Dein BFSG-Barrierefreiheits-Bericht fuer ' + $('Build Unlock').first().json.url }}", "={{ 'Hallo,\\n\\ndein vollstaendiger BFSG-Schnelltest-Bericht ist fertig.\\n\\nErgebnis: ' + $('Build Unlock').first().json.score + '/100 (' + $('Build Unlock').first().json.failedCount + ' kritische Punkte)\\nGeprueft: ' + $('Build Unlock').first().json.url + '\\n\\nHier siehst du den vollstaendigen Bericht inklusive aller gefundenen Barrieren (Link 7 Tage gueltig):\\n' + $('Build Unlock').first().json.link + '\\n\\nDu willst die Fehler professionell beheben lassen? Antworte einfach auf diese Mail.\\n\\nBeste Gruesse\\nDein InklusivDigital-Team' }}", 2200, 1000));
+nodes.push(gmail(
+  'Send Report Email',
+  "={{ $('Build Unlock').first().json.email }}",
+  "={{ 'Dein BFSG-Barrierefreiheits-Bericht fuer ' + $('Build Unlock').first().json.url }}",
+  "={{ $('Build Unlock').first().json.emailHtml }}",
+  2200, 1000,
+));
 nodes.push(respond('Antwort Unlock', 0, '={{ { success: true } }}', 2420, 1000));
 connect('Unlock Webhook', 'Validate Unlock Input');
 connect('Validate Unlock Input', 'Unlock-Input ok?');
