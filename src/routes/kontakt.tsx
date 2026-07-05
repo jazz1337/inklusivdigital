@@ -121,7 +121,7 @@ function KontaktPage() {
           </h1>
           <p className="mt-4 text-muted-foreground">
             Ihre Anfrage ist bei uns eingegangen. Wir melden uns in der Regel
-            innerhalb von 24 Stunden bei Ihnen.
+            innerhalb von 48 Stunden bei Ihnen.
           </p>
           <button
             onClick={() => setStatus("idle")}
@@ -146,7 +146,7 @@ function KontaktPage() {
             Sprechen wir über Ihr Projekt
           </h1>
           <p className="mt-4 text-lg text-muted-foreground">
-            Füllen Sie das Formular aus – wir melden uns innerhalb von 24 Stunden
+            Füllen Sie das Formular aus – wir melden uns innerhalb von 48 Stunden
             für ein unverbindliches Erstgespräch.
           </p>
         </div>

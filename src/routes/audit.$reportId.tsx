@@ -41,7 +41,7 @@ function AuditReportPage() {
     const statusUrl = import.meta.env.VITE_SCAN_STATUS_URL as string | undefined;
     if (!statusUrl) {
       setPhase("error");
-      setErrorMsg("Der Schnelltest ist aktuell nicht konfiguriert.");
+      setErrorMsg("Der Schnelltest ist gerade nicht verfügbar. Bitte versuch es in Kürze noch einmal.");
       return;
     }
 
@@ -58,10 +58,15 @@ function AuditReportPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ reportId }),
         });
-        const json: StatusResponse = await res.json();
+        let json: StatusResponse | null = null;
+        try {
+          json = await res.json();
+        } catch {
+          json = null;
+        }
         if (cancelled) return;
 
-        if (json.status === "done") {
+        if (json?.status === "done") {
           setData({
             url: json.url ?? "",
             score: typeof json.score === "number" ? json.score : null,
@@ -72,12 +77,12 @@ function AuditReportPage() {
           setPhase("done");
           return;
         }
-        if (json.status === "error") {
-          setErrorMsg(json.error ?? "Der Scan ist fehlgeschlagen.");
+        if (json?.status === "error") {
+          setErrorMsg("Beim Prüfen deiner Website ist etwas schiefgelaufen. Bitte starte den Schnelltest noch einmal.");
           setPhase("error");
           return;
         }
-        if (json.status === "notfound") {
+        if (json?.status === "notfound") {
           setPhase("notfound");
           return;
         }
@@ -86,7 +91,7 @@ function AuditReportPage() {
       }
 
       if (performance.now() - (startedAt.current ?? 0) > POLL_TIMEOUT_MS) {
-        setErrorMsg("Der Scan dauert länger als erwartet. Bitte versuche es später erneut.");
+        setErrorMsg("Der Scan dauert gerade länger als gewöhnlich. Bitte starte ihn in einem Moment noch einmal.");
         setPhase("error");
         return;
       }
@@ -174,7 +179,7 @@ function UnlockGate({ reportId }: { reportId: string }) {
     const unlockUrl = import.meta.env.VITE_SCAN_UNLOCK_URL as string | undefined;
     if (!unlockUrl) {
       setStatus("error");
-      setErrorMsg("Dieser Dienst ist aktuell nicht verfügbar.");
+      setErrorMsg("Der Versand ist gerade nicht verfügbar. Bitte versuch es in Kürze noch einmal.");
       return;
     }
     setStatus("submitting");
@@ -184,14 +189,27 @@ function UnlockGate({ reportId }: { reportId: string }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ reportId, email }),
       });
-      const json = await res.json();
-      if (!res.ok || !json.success) {
-        throw new Error(json.error || "Bitte prüfe deine E-Mail-Adresse.");
+
+      // Antwort defensiv einlesen, damit ein leerer/kaputter Body nicht als
+      // technischer Fehler beim Nutzer landet.
+      let json: { success?: boolean; error?: string } | null = null;
+      try {
+        json = await res.json();
+      } catch {
+        json = null;
+      }
+
+      if (!res.ok || !json?.success) {
+        setStatus("error");
+        // Der Server schickt bei ungültiger/Wegwerf-E-Mail eine verständliche
+        // Rückmeldung – diese zeigen, sonst eine allgemeine Meldung.
+        setErrorMsg(json?.error || "Das hat gerade nicht geklappt. Bitte prüf deine E-Mail-Adresse und versuch es noch einmal.");
+        return;
       }
       setStatus("sent");
-    } catch (err) {
+    } catch {
       setStatus("error");
-      setErrorMsg(err instanceof Error ? err.message : "Unbekannter Fehler.");
+      setErrorMsg("Das hat gerade nicht geklappt. Bitte versuch es in einem Moment noch einmal.");
     }
   }
 
