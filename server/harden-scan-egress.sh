@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 #
+# ⚠️ ÜBERHOLT / NICHT MEHR VERWENDEN.
+# Auf Ubuntu 24.04 scheitert Snap-Chromium unter einem unprivilegierten Benutzer an
+# `kernel.apparmor_restrict_unprivileged_userns=1` ("Unable to connect to Chrome").
+# Der SSRF-Schutz läuft jetzt direkt im Workflow-Befehl via `systemd-run -p IPAddressDeny=…`
+# (kein Server-Setup nötig) — siehe n8n/README-bfsg-scan-v2.md.
+# Dieses Skript bleibt nur zur Nachvollziehbarkeit erhalten.
+#
+# ---------------------------------------------------------------------------
 # Härtet den BFSG-Scan-Server (Hetzner / Ubuntu) gegen SSRF ab.
 #
 # Idee: Lighthouse/Chrome läuft künftig als eigener, unprivilegierter Benutzer

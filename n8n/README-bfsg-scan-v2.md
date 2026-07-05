@@ -46,16 +46,24 @@ VITE_SCAN_UNLOCK_URL=https://n8n.jazzsleeps.org/webhook/bfsg-unlock
 VITE_SCAN_FULL_URL=https://n8n.jazzsleeps.org/webhook/bfsg-full
 ```
 
-## SSRF-Absicherung (vor voll-öffentlichem Betrieb)
+## SSRF-Absicherung (bereits im Workflow enthalten, kein Server-Setup nötig)
 
-Die URL-Validierung prüft nur den Hostname-String, nicht die tatsächlich aufgelöste IP — eine öffentlich aussehende Domain mit internem DNS-Eintrag käme sonst durch. Zusätzlich lief Lighthouse bislang als `root`, was für einen Browser, der fremde Seiten öffnet, ohnehin riskant ist.
+Die URL-Validierung prüft nur den Hostname-String, nicht die tatsächlich aufgelöste IP — eine öffentlich aussehende Domain mit internem DNS-Eintrag käme sonst durch (SSRF via DNS-Rebinding).
 
-**Lösung (einmalig auf dem Hetzner-/Ubuntu-Server als root ausführen):**
+**Lösung:** Der `Lighthouse Scan`-Node startet den Scan mit
+`systemd-run --scope --quiet -p "IPAddressDeny=10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 169.254.0.0/16 100.64.0.0/10" lighthouse …`.
+`systemd-run` (in Ubuntu eingebaut, kein Setup) kapselt den Chrome-Prozess in einen transienten Scope mit **kernelseitiger Egress-Sperre**: Verbindungen zu internen Netzen (`10.x`, `172.16.x`, `192.168.x`), Link-Local inkl. dem Cloud-Metadaten-Endpunkt `169.254.169.254` und CGNAT werden blockiert — egal, worauf ein Domainname tatsächlich auflöst. Loopback (`127.x`) bleibt frei, weil Lighthouse mit Chrome intern darüber kommuniziert.
 
+Verifikation auf dem Server (als root):
 ```bash
-sudo bash server/harden-scan-egress.sh
+# Öffentlicher Scan muss JSON liefern:
+systemd-run --scope --quiet -p "IPAddressDeny=10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 169.254.0.0/16 100.64.0.0/10" \
+  lighthouse https://example.com --only-categories=accessibility --output=json \
+  --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" --quiet 2>/dev/null | head -c 60
+
+# Metadaten-Endpunkt muss geblockt sein (Timeout/Fehler = gut):
+systemd-run --scope --quiet -p "IPAddressDeny=169.254.0.0/16" \
+  curl -m 4 -s -o /dev/null -w "%{http_code}\n" http://169.254.169.254/
 ```
 
-Das Skript legt einen abgeschotteten Benutzer `lhscan` an, prüft dass Lighthouse als dieser läuft, sperrt per iptables **nur für lhscan** den Weg zu allen internen/privaten Adressbereichen (RFC1918, Loopback, Link-Local inkl. `169.254.169.254`, CGNAT — DNS bleibt erlaubt) und persistiert die Regeln über Reboots. Root und n8n bleiben unberührt; ein Aussperren ist praktisch ausgeschlossen.
-
-Der `Lighthouse Scan`-Node in `bfsg-scan-v2.json` startet den Scan bereits mit `sudo -u lhscan -H lighthouse …` — nach dem Skript-Lauf greift der Schutz also automatisch. (Voraussetzung: `root` darf ohne Passwort zu `lhscan` wechseln, was standardmäßig der Fall ist.)
+> Hinweis: `server/harden-scan-egress.sh` (separater `lhscan`-Benutzer + iptables) wird **nicht** benötigt — auf Ubuntu 24.04 scheitert Snap-Chromium unter einem unprivilegierten Benutzer an `apparmor_restrict_unprivileged_userns`. Der `systemd-run`-Ansatz löst SSRF sauberer und ohne diese Komplikation. Falls das Skript bereits gelaufen ist: die Reste sind harmlos und können entfernt werden (`userdel -r lhscan` + die `lhscan`-iptables-Regeln).
