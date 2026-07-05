@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { Pause, Play } from "lucide-react";
+import { useAnimPaused } from "@/lib/use-reduced-motion";
 
 const LOOP = "3.5s";
 
@@ -14,10 +14,7 @@ function ring(name: string, playState: string): React.CSSProperties {
 }
 
 export function AuditScanAnimation() {
-  const [paused, setPaused] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  });
+  const [paused, setPaused] = useAnimPaused();
   const ps = paused ? "paused" : "running";
 
   return (
