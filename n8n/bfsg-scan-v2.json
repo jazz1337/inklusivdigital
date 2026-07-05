@@ -1,0 +1,1139 @@
+{
+  "name": "BFSG-Schnelltest — Scan, Status, Unlock, Full",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bfsg-scan",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "n001-0000-4000-8000-000000000000",
+      "name": "Scan Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "bfsg-scan"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Validate & Normalize URL (regex-only, keine URL-Klasse -- s. bisheriger Fix)\nconst raw = ($json.body && $json.body.url ? String($json.body.url) : '').trim();\nfunction fail(reason) { return [{ json: { valid: false, reason } }]; }\nif (!raw) return fail('Keine URL angegeben.');\nif (raw.length > 512) return fail('URL ist zu lang.');\nlet s = /^https?:\\/\\//i.test(raw) ? raw : 'https://' + raw;\ns = s.split('#')[0].split('?')[0];\nconst m = s.match(/^(https?):\\/\\/([a-z0-9.-]+)(?::(\\d{1,5}))?(\\/[A-Za-z0-9\\-._~/]*)?$/i);\nif (!m) return fail('Das ist keine gueltige URL oder enthaelt nicht unterstuetzte Zeichen.');\nconst hostname = m[2].toLowerCase();\nconst port = m[3];\nconst pathname = m[4] || '';\nconst isLocalName = hostname === 'localhost' || hostname.endsWith('.local') || hostname.endsWith('.internal') || hostname.endsWith('.test') || hostname.endsWith('.localhost');\nconst ipv4 = hostname.match(/^(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})$/);\nlet priv = false;\nif (ipv4) {\n  const a = parseInt(ipv4[1], 10), b = parseInt(ipv4[2], 10);\n  priv = a === 127 || a === 10 || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || (a === 169 && b === 254) || (a === 100 && b >= 64 && b <= 127) || a === 0 || a >= 224;\n}\nif (isLocalName || priv) return fail('Bitte gib eine oeffentlich erreichbare Website-URL an.');\nconst safeUrl = 'https://' + hostname + (port ? ':' + port : '') + (pathname !== '/' ? pathname : '');\nconst shellQuoted = \"'\" + safeUrl.replace(/'/g, \"'\\\\''\") + \"'\";\nfunction secureId() {\n  try {\n    if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();\n    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {\n      const b = new Uint8Array(16); crypto.getRandomValues(b);\n      b[6] = (b[6] & 0x0f) | 0x40; b[8] = (b[8] & 0x3f) | 0x80;\n      const h = []; for (let i = 0; i < 16; i++) h.push(b[i].toString(16).padStart(2, '0'));\n      return h[0]+h[1]+h[2]+h[3]+'-'+h[4]+h[5]+'-'+h[6]+h[7]+'-'+h[8]+h[9]+'-'+h[10]+h[11]+h[12]+h[13]+h[14]+h[15];\n    }\n  } catch (e) {}\n  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => { const r = (Math.random() * 16) | 0; const v = c === 'x' ? r : (r & 0x3) | 0x8; return v.toString(16); });\n}\nreturn [{ json: { valid: true, url: safeUrl, urlShellQuoted: shellQuoted, reportId: secureId(), requestedAt: new Date().toISOString() } }];"
+      },
+      "id": "n002-0000-4000-8000-000000000000",
+      "name": "Validate & Normalize URL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "n003-0000-4000-8000-000000000000",
+      "name": "URL gueltig?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { success: false, error: $json.reason } }}",
+        "options": {},
+        "responseCode": 400
+      },
+      "id": "n004-0000-4000-8000-000000000000",
+      "name": "Fehler (ungueltige URL)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        660,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pending-Marker (base64, shell-sicher) -- damit sofortiges Polling die Datei findet\nconst v = $json;\nconst doc = { status: 'pending', reportId: v.reportId, url: v.url, requestedAt: v.requestedAt };\nconst b64 = Buffer.from(JSON.stringify(doc), 'utf-8').toString('base64');\nreturn [{ json: { ...v, pendingBase64: b64 } }];"
+      },
+      "id": "n005-0000-4000-8000-000000000000",
+      "name": "Build Pending",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "privateKey",
+        "command": "={{ 'mkdir -p $HOME/bfsg-reports && echo ' + $json.pendingBase64 + ' | base64 -d > $HOME/bfsg-reports/' + $json.reportId + '.json' }}"
+      },
+      "id": "n006-0000-4000-8000-000000000000",
+      "name": "Write Pending Marker",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        880,
+        -80
+      ],
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "DAjiQBL7pUMlOqHe",
+          "name": "SSH Private Key account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { success: true, reportId: $json.reportId, url: $json.url } }}",
+        "options": {}
+      },
+      "id": "n007-0000-4000-8000-000000000000",
+      "name": "Antwort reportId",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1100,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "privateKey",
+        "command": "={{ 'systemd-run --scope --quiet -p \"IPAddressDeny=10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 169.254.0.0/16 100.64.0.0/10\" lighthouse ' + $('Build Pending').first().json.urlShellQuoted + ' --only-categories=accessibility --output=json --chrome-flags=\"--headless --no-sandbox --disable-dev-shm-usage\" --quiet --max-wait-for-load=45000 2>/dev/null' }}"
+      },
+      "id": "n008-0000-4000-8000-000000000000",
+      "name": "Lighthouse Scan",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        1320,
+        -80
+      ],
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "DAjiQBL7pUMlOqHe",
+          "name": "SSH Private Key account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse Lighthouse Results\nconst meta = $('Validate & Normalize URL').first().json;\nconst MAX_FAILED = 50, MAX_TITLES = 100;\nlet score = null, lhFailed = [], lhPassed = [], lhManual = [], parseError = null;\ntry {\n  const lh = JSON.parse($json.stdout || '');\n  score = Math.round(lh.categories.accessibility.score * 100);\n  for (const [key, audit] of Object.entries(lh.audits)) {\n    if (audit.scoreDisplayMode === 'manual') lhManual.push(audit.title);\n    else if (audit.score === 0) lhFailed.push({ id: key, title: audit.title, description: (audit.description || '').replace(/\\[.*?\\]\\(.*?\\)/g, '').trim() });\n    else if (audit.score === 1) lhPassed.push(audit.title);\n  }\n  lhFailed = lhFailed.slice(0, MAX_FAILED); lhPassed = lhPassed.slice(0, MAX_TITLES); lhManual = lhManual.slice(0, MAX_TITLES);\n} catch (e) { parseError = 'Der Scan konnte nicht ausgewertet werden.'; }\nreturn [{ json: { reportId: meta.reportId, url: meta.url, requestedAt: meta.requestedAt, completedAt: new Date().toISOString(), status: parseError ? 'error' : 'done', error: parseError, score, failedCount: lhFailed.length, passedCount: lhPassed.length, manualCount: lhManual.length, lhFailed, lhPassed, lhManual } }];"
+      },
+      "id": "n009-0000-4000-8000-000000000000",
+      "name": "Parse Lighthouse Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1540,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Finales Report-File (base64, shell-sicher) -- ueberschreibt den Pending-Marker\nconst r = $json;\nconst b64 = Buffer.from(JSON.stringify(r), 'utf-8').toString('base64');\nreturn [{ json: { ...r, finalBase64: b64 } }];"
+      },
+      "id": "n010-0000-4000-8000-000000000000",
+      "name": "Build Final",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1760,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "privateKey",
+        "command": "={{ 'echo ' + $json.finalBase64 + ' | base64 -d > $HOME/bfsg-reports/' + $json.reportId + '.json' }}"
+      },
+      "id": "n011-0000-4000-8000-000000000000",
+      "name": "Write Final Report",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        1980,
+        -80
+      ],
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "DAjiQBL7pUMlOqHe",
+          "name": "SSH Private Key account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bfsg-status",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "n012-0000-4000-8000-000000000000",
+      "name": "Status Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        500
+      ],
+      "webhookId": "bfsg-status"
+    },
+    {
+      "parameters": {
+        "jsCode": "// reportId strikt whitelisten, bevor sie in einen cat-Befehl geht (Command-Injection-Schutz)\nconst id = ($json.body && $json.body.reportId ? String($json.body.reportId) : '').trim();\nif (!/^[0-9a-f-]{36}$/.test(id)) return [{ json: { ok: false, reason: 'Ungueltige Report-ID.' } }];\nreturn [{ json: { ok: true, reportId: id } }];"
+      },
+      "id": "n013-0000-4000-8000-000000000000",
+      "name": "Validate reportId",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.ok }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "n014-0000-4000-8000-000000000000",
+      "name": "reportId ok?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { status: \"error\", error: $json.reason } }}",
+        "options": {},
+        "responseCode": 400
+      },
+      "id": "n015-0000-4000-8000-000000000000",
+      "name": "Fehler (Status-ID)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        660,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "privateKey",
+        "command": "={{ 'cat $HOME/bfsg-reports/' + $json.reportId + '.json 2>/dev/null || echo \\'{\\\"status\\\":\\\"notfound\\\"}\\'' }}"
+      },
+      "id": "n016-0000-4000-8000-000000000000",
+      "name": "Read Report",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        660,
+        460
+      ],
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "DAjiQBL7pUMlOqHe",
+          "name": "SSH Private Key account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Teaser-Projektion: NIEMALS die Fehlerliste ausliefern (Gate auf Datenebene)\nlet doc;\ntry { doc = JSON.parse($json.stdout || '{}'); } catch (e) { doc = { status: 'notfound' }; }\nif (doc.status === 'pending') return [{ json: { status: 'pending' } }];\nif (doc.status === 'error' || !doc.status) return [{ json: { status: 'error', error: doc.error || 'Scan fehlgeschlagen.' } }];\nif (doc.status === 'notfound') return [{ json: { status: 'notfound' } }];\n// status === 'done' -> nur Score + Zaehler, KEINE lhFailed/lhPassed/lhManual-Inhalte\nreturn [{ json: { status: 'done', url: doc.url, score: doc.score, failedCount: doc.failedCount, passedCount: doc.passedCount, manualCount: doc.manualCount } }];"
+      },
+      "id": "n017-0000-4000-8000-000000000000",
+      "name": "Project Status",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "n018-0000-4000-8000-000000000000",
+      "name": "Antwort Status",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1100,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bfsg-unlock",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "n019-0000-4000-8000-000000000000",
+      "name": "Unlock Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        1000
+      ],
+      "webhookId": "bfsg-unlock"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Unlock-Input pruefen: reportId-Whitelist + E-Mail-Format + Wegwerf-Blockliste\nconst DISPOSABLE = [\"mailinator.com\",\"guerrillamail.com\",\"guerrillamail.info\",\"guerrillamail.net\",\"grr.la\",\"sharklasers.com\",\"10minutemail.com\",\"tempmail.com\",\"temp-mail.org\",\"throwaway.email\",\"yopmail.com\",\"trashmail.com\",\"getnada.com\",\"dispostable.com\",\"maildrop.cc\",\"mailnesia.com\",\"mytemp.email\",\"fakeinbox.com\",\"tempinbox.com\",\"mohmal.com\",\"emailondeck.com\",\"spam4.me\",\"mailcatch.com\",\"discard.email\",\"tmpmail.org\"];\nconst id = ($json.body && $json.body.reportId ? String($json.body.reportId) : '').trim();\nconst email = ($json.body && $json.body.email ? String($json.body.email) : '').trim().toLowerCase();\nif (!/^[0-9a-f-]{36}$/.test(id)) return [{ json: { ok: false, reason: 'Ungueltige Report-ID.' } }];\nif (email.length > 254 || !/^[^\\s@]+@([^\\s@.]+\\.)+[^\\s@.]{2,}$/.test(email)) return [{ json: { ok: false, reason: 'Bitte gib eine gueltige E-Mail-Adresse ein.' } }];\nconst domain = email.split('@')[1];\n// Domain-Zeichen strikt whitelisten -- verhindert, dass Sonderzeichen (&, ?, #, %)\n// aus der Adresse in die DNS-over-HTTPS-Query (MX Lookup) geschleust werden.\nif (!/^[a-z0-9.-]+$/.test(domain)) return [{ json: { ok: false, reason: 'Bitte gib eine gueltige E-Mail-Adresse ein.' } }];\nif (DISPOSABLE.includes(domain)) return [{ json: { ok: false, reason: 'Wegwerf-E-Mail-Adressen sind nicht erlaubt. Bitte nutze deine geschaeftliche Adresse.' } }];\nreturn [{ json: { ok: true, reportId: id, email, emailDomain: domain } }];"
+      },
+      "id": "n020-0000-4000-8000-000000000000",
+      "name": "Validate Unlock Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        1000
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.ok }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "n021-0000-4000-8000-000000000000",
+      "name": "Unlock-Input ok?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        1000
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { success: false, error: $json.reason } }}",
+        "options": {},
+        "responseCode": 400
+      },
+      "id": "n022-0000-4000-8000-000000000000",
+      "name": "Fehler (Unlock-Input)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        660,
+        1160
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://dns.google/resolve?name={{ $json.emailDomain }}&type=MX",
+        "options": {}
+      },
+      "id": "n023-0000-4000-8000-000000000000",
+      "name": "MX Lookup (DoH)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        1000
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// MX-Records aus der DNS-over-HTTPS-Antwort (dns.google) auswerten\nconst prev = $('Validate Unlock Input').first().json;\nlet hasMx = false;\ntry { const ans = ($json.Answer || []); hasMx = ans.some((a) => a.type === 15); } catch (e) {}\nreturn [{ json: { ...prev, hasMx } }];"
+      },
+      "id": "n024-0000-4000-8000-000000000000",
+      "name": "Check MX",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        1000
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.hasMx }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "n025-0000-4000-8000-000000000000",
+      "name": "MX vorhanden?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1100,
+        1000
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { success: false, error: \"Fuer diese E-Mail-Domain existiert kein Mailserver. Bitte pruefe die Adresse.\" } }}",
+        "options": {},
+        "responseCode": 400
+      },
+      "id": "n026-0000-4000-8000-000000000000",
+      "name": "Fehler (kein MX)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1320,
+        1160
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "privateKey",
+        "command": "={{ 'cat $HOME/bfsg-reports/' + $('Validate Unlock Input').first().json.reportId + '.json 2>/dev/null || echo \\'{}\\'' }}"
+      },
+      "id": "n027-0000-4000-8000-000000000000",
+      "name": "Read Full For Unlock",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        1320,
+        1000
+      ],
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "DAjiQBL7pUMlOqHe",
+          "name": "SSH Private Key account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Vollreport unter geheimem Token kopieren + Mail-Inhalt + Lead-Zeile vorbereiten\nconst meta = $('Validate Unlock Input').first().json;\nlet full;\ntry { full = JSON.parse($json.stdout || '{}'); } catch (e) { full = {}; }\nif (full.status !== 'done') return [{ json: { expired: true, email: meta.email } }];\nfunction secureId() {\n  try {\n    if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();\n    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {\n      const b = new Uint8Array(16); crypto.getRandomValues(b);\n      b[6] = (b[6] & 0x0f) | 0x40; b[8] = (b[8] & 0x3f) | 0x80;\n      const h = []; for (let i = 0; i < 16; i++) h.push(b[i].toString(16).padStart(2, '0'));\n      return h[0]+h[1]+h[2]+h[3]+'-'+h[4]+h[5]+'-'+h[6]+h[7]+'-'+h[8]+h[9]+'-'+h[10]+h[11]+h[12]+h[13]+h[14]+h[15];\n    }\n  } catch (e) {}\n  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => { const r = (Math.random() * 16) | 0; const v = c === 'x' ? r : (r & 0x3) | 0x8; return v.toString(16); });\n}\nconst token = secureId();\nconst fullB64 = Buffer.from(JSON.stringify(full), 'utf-8').toString('base64');\nconst link = 'https://jazz1337.github.io/inklusivdigital/audit/full/' + token;\n// Lead-Zeile: CSV-sicher (Kommas/Zeilenumbrueche aus den Feldern entfernt)\nconst clean = (s) => String(s || '').replace(/[\",\\r\\n]/g, ' ');\nconst leadLine = [new Date().toISOString(), clean(meta.email), clean(full.url), full.score, token].join(',');\nconst leadB64 = Buffer.from(leadLine + '\\n', 'utf-8').toString('base64');\nreturn [{ json: { token, fullB64, leadB64, link, email: meta.email, url: full.url, score: full.score, failedCount: full.failedCount } }];"
+      },
+      "id": "n028-0000-4000-8000-000000000000",
+      "name": "Build Unlock",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1540,
+        1000
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ !$json.expired }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "n029-0000-4000-8000-000000000000",
+      "name": "Report noch da?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1760,
+        1000
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { success: false, error: \"Dieser Schnelltest ist abgelaufen. Bitte starte einen neuen Scan.\" } }}",
+        "options": {},
+        "responseCode": 410
+      },
+      "id": "n030-0000-4000-8000-000000000000",
+      "name": "Fehler (Report abgelaufen)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1980,
+        1160
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "privateKey",
+        "command": "={{ 'mkdir -p $HOME/bfsg-reports/full && echo ' + $json.fullB64 + ' | base64 -d > $HOME/bfsg-reports/full/' + $json.token + '.json && echo ' + $json.leadB64 + ' | base64 -d >> $HOME/bfsg-reports/leads.csv' }}"
+      },
+      "id": "n031-0000-4000-8000-000000000000",
+      "name": "Write Full Copy",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        1980,
+        1000
+      ],
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "DAjiQBL7pUMlOqHe",
+          "name": "SSH Private Key account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Build Unlock').first().json.email }}",
+        "subject": "={{ 'Dein BFSG-Barrierefreiheits-Bericht fuer ' + $('Build Unlock').first().json.url }}",
+        "message": "={{ 'Hallo,\\n\\ndein vollstaendiger BFSG-Schnelltest-Bericht ist fertig.\\n\\nErgebnis: ' + $('Build Unlock').first().json.score + '/100 (' + $('Build Unlock').first().json.failedCount + ' kritische Punkte)\\nGeprueft: ' + $('Build Unlock').first().json.url + '\\n\\nHier siehst du den vollstaendigen Bericht inklusive aller gefundenen Barrieren (Link 7 Tage gueltig):\\n' + $('Build Unlock').first().json.link + '\\n\\nDu willst die Fehler professionell beheben lassen? Antworte einfach auf diese Mail.\\n\\nBeste Gruesse\\nDein InklusivDigital-Team' }}",
+        "options": {}
+      },
+      "id": "n032-0000-4000-8000-000000000000",
+      "name": "Send Report Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [
+        2200,
+        1000
+      ],
+      "webhookId": "gmail-n033-0000-4000-8000-000000000000",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REPLACE_WITH_YOUR_GMAIL_CREDENTIAL",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { success: true } }}",
+        "options": {}
+      },
+      "id": "n034-0000-4000-8000-000000000000",
+      "name": "Antwort Unlock",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        2420,
+        1000
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bfsg-full",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "n035-0000-4000-8000-000000000000",
+      "name": "Full Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        1600
+      ],
+      "webhookId": "bfsg-full"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Token strikt whitelisten vor dem cat-Befehl\nconst t = ($json.body && $json.body.token ? String($json.body.token) : '').trim();\nif (!/^[0-9a-f-]{36}$/.test(t)) return [{ json: { ok: false, reason: 'Ungueltiger Token.' } }];\nreturn [{ json: { ok: true, token: t } }];"
+      },
+      "id": "n036-0000-4000-8000-000000000000",
+      "name": "Validate Token",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        1600
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.ok }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "n037-0000-4000-8000-000000000000",
+      "name": "Token ok?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        1600
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { status: \"notfound\" } }}",
+        "options": {},
+        "responseCode": 400
+      },
+      "id": "n038-0000-4000-8000-000000000000",
+      "name": "Fehler (Token)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        660,
+        1740
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "privateKey",
+        "command": "={{ 'cat $HOME/bfsg-reports/full/' + $json.token + '.json 2>/dev/null || echo \\'{\\\"status\\\":\\\"notfound\\\"}\\'' }}"
+      },
+      "id": "n039-0000-4000-8000-000000000000",
+      "name": "Read Full",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        660,
+        1560
+      ],
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "DAjiQBL7pUMlOqHe",
+          "name": "SSH Private Key account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Vollreport ausliefern (Liste enthuellt) -- nur ueber gueltigen Token erreichbar\nlet doc;\ntry { doc = JSON.parse($json.stdout || '{}'); } catch (e) { doc = { status: 'notfound' }; }\nif (doc.status !== 'done') return [{ json: { status: 'notfound' } }];\nreturn [{ json: doc }];"
+      },
+      "id": "n040-0000-4000-8000-000000000000",
+      "name": "Project Full",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        1560
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "n041-0000-4000-8000-000000000000",
+      "name": "Antwort Full",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1100,
+        1560
+      ]
+    }
+  ],
+  "connections": {
+    "Scan Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate & Normalize URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate & Normalize URL": {
+      "main": [
+        [
+          {
+            "node": "URL gueltig?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "URL gueltig?": {
+      "main": [
+        [
+          {
+            "node": "Build Pending",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fehler (ungueltige URL)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Pending": {
+      "main": [
+        [
+          {
+            "node": "Write Pending Marker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Pending Marker": {
+      "main": [
+        [
+          {
+            "node": "Antwort reportId",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Antwort reportId": {
+      "main": [
+        [
+          {
+            "node": "Lighthouse Scan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lighthouse Scan": {
+      "main": [
+        [
+          {
+            "node": "Parse Lighthouse Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Lighthouse Results": {
+      "main": [
+        [
+          {
+            "node": "Build Final",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Final": {
+      "main": [
+        [
+          {
+            "node": "Write Final Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Status Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate reportId",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate reportId": {
+      "main": [
+        [
+          {
+            "node": "reportId ok?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "reportId ok?": {
+      "main": [
+        [
+          {
+            "node": "Read Report",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fehler (Status-ID)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Report": {
+      "main": [
+        [
+          {
+            "node": "Project Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Project Status": {
+      "main": [
+        [
+          {
+            "node": "Antwort Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Unlock Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate Unlock Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Unlock Input": {
+      "main": [
+        [
+          {
+            "node": "Unlock-Input ok?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Unlock-Input ok?": {
+      "main": [
+        [
+          {
+            "node": "MX Lookup (DoH)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fehler (Unlock-Input)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MX Lookup (DoH)": {
+      "main": [
+        [
+          {
+            "node": "Check MX",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check MX": {
+      "main": [
+        [
+          {
+            "node": "MX vorhanden?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MX vorhanden?": {
+      "main": [
+        [
+          {
+            "node": "Read Full For Unlock",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fehler (kein MX)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Full For Unlock": {
+      "main": [
+        [
+          {
+            "node": "Build Unlock",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Unlock": {
+      "main": [
+        [
+          {
+            "node": "Report noch da?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Report noch da?": {
+      "main": [
+        [
+          {
+            "node": "Write Full Copy",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fehler (Report abgelaufen)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Full Copy": {
+      "main": [
+        [
+          {
+            "node": "Send Report Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Report Email": {
+      "main": [
+        [
+          {
+            "node": "Antwort Unlock",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Full Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Token": {
+      "main": [
+        [
+          {
+            "node": "Token ok?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Token ok?": {
+      "main": [
+        [
+          {
+            "node": "Read Full",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fehler (Token)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Full": {
+      "main": [
+        [
+          {
+            "node": "Project Full",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Project Full": {
+      "main": [
+        [
+          {
+            "node": "Antwort Full",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

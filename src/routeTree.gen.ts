@@ -26,6 +26,8 @@ import { Route as LeistungenBarrierefreierOnlineshopRouteImport } from './routes
 import { Route as GuidesTastaturNavigationRouteImport } from './routes/guides.tastatur-navigation'
 import { Route as GuidesKontrastRouteImport } from './routes/guides.kontrast'
 import { Route as GuidesAlttexteRouteImport } from './routes/guides.alttexte'
+import { Route as AuditReportIdRouteImport } from './routes/audit.$reportId'
+import { Route as AuditFullTokenRouteImport } from './routes/audit.full.$token'
 
 const UeberUnsRoute = UeberUnsRouteImport.update({
   id: '/ueber-uns',
@@ -115,6 +117,16 @@ const GuidesAlttexteRoute = GuidesAlttexteRouteImport.update({
   path: '/guides/alttexte',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuditReportIdRoute = AuditReportIdRouteImport.update({
+  id: '/audit/$reportId',
+  path: '/audit/$reportId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuditFullTokenRoute = AuditFullTokenRouteImport.update({
+  id: '/audit/full/$token',
+  path: '/audit/full/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -124,6 +136,7 @@ export interface FileRoutesByFullPath {
   '/impressum': typeof ImpressumRoute
   '/kontakt': typeof KontaktRoute
   '/ueber-uns': typeof UeberUnsRoute
+  '/audit/$reportId': typeof AuditReportIdRoute
   '/guides/alttexte': typeof GuidesAlttexteRoute
   '/guides/kontrast': typeof GuidesKontrastRoute
   '/guides/tastatur-navigation': typeof GuidesTastaturNavigationRoute
@@ -134,6 +147,7 @@ export interface FileRoutesByFullPath {
   '/wissen/bin-ich-betroffen': typeof WissenBinIchBetroffenRoute
   '/wissen/faq': typeof WissenFaqRoute
   '/wissen/was-ist-bfsg': typeof WissenWasIstBfsgRoute
+  '/audit/full/$token': typeof AuditFullTokenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -143,6 +157,7 @@ export interface FileRoutesByTo {
   '/impressum': typeof ImpressumRoute
   '/kontakt': typeof KontaktRoute
   '/ueber-uns': typeof UeberUnsRoute
+  '/audit/$reportId': typeof AuditReportIdRoute
   '/guides/alttexte': typeof GuidesAlttexteRoute
   '/guides/kontrast': typeof GuidesKontrastRoute
   '/guides/tastatur-navigation': typeof GuidesTastaturNavigationRoute
@@ -153,6 +168,7 @@ export interface FileRoutesByTo {
   '/wissen/bin-ich-betroffen': typeof WissenBinIchBetroffenRoute
   '/wissen/faq': typeof WissenFaqRoute
   '/wissen/was-ist-bfsg': typeof WissenWasIstBfsgRoute
+  '/audit/full/$token': typeof AuditFullTokenRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -163,6 +179,7 @@ export interface FileRoutesById {
   '/impressum': typeof ImpressumRoute
   '/kontakt': typeof KontaktRoute
   '/ueber-uns': typeof UeberUnsRoute
+  '/audit/$reportId': typeof AuditReportIdRoute
   '/guides/alttexte': typeof GuidesAlttexteRoute
   '/guides/kontrast': typeof GuidesKontrastRoute
   '/guides/tastatur-navigation': typeof GuidesTastaturNavigationRoute
@@ -173,6 +190,7 @@ export interface FileRoutesById {
   '/wissen/bin-ich-betroffen': typeof WissenBinIchBetroffenRoute
   '/wissen/faq': typeof WissenFaqRoute
   '/wissen/was-ist-bfsg': typeof WissenWasIstBfsgRoute
+  '/audit/full/$token': typeof AuditFullTokenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -184,6 +202,7 @@ export interface FileRouteTypes {
     | '/impressum'
     | '/kontakt'
     | '/ueber-uns'
+    | '/audit/$reportId'
     | '/guides/alttexte'
     | '/guides/kontrast'
     | '/guides/tastatur-navigation'
@@ -194,6 +213,7 @@ export interface FileRouteTypes {
     | '/wissen/bin-ich-betroffen'
     | '/wissen/faq'
     | '/wissen/was-ist-bfsg'
+    | '/audit/full/$token'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -203,6 +223,7 @@ export interface FileRouteTypes {
     | '/impressum'
     | '/kontakt'
     | '/ueber-uns'
+    | '/audit/$reportId'
     | '/guides/alttexte'
     | '/guides/kontrast'
     | '/guides/tastatur-navigation'
@@ -213,6 +234,7 @@ export interface FileRouteTypes {
     | '/wissen/bin-ich-betroffen'
     | '/wissen/faq'
     | '/wissen/was-ist-bfsg'
+    | '/audit/full/$token'
   id:
     | '__root__'
     | '/'
@@ -222,6 +244,7 @@ export interface FileRouteTypes {
     | '/impressum'
     | '/kontakt'
     | '/ueber-uns'
+    | '/audit/$reportId'
     | '/guides/alttexte'
     | '/guides/kontrast'
     | '/guides/tastatur-navigation'
@@ -232,6 +255,7 @@ export interface FileRouteTypes {
     | '/wissen/bin-ich-betroffen'
     | '/wissen/faq'
     | '/wissen/was-ist-bfsg'
+    | '/audit/full/$token'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -242,6 +266,7 @@ export interface RootRouteChildren {
   ImpressumRoute: typeof ImpressumRoute
   KontaktRoute: typeof KontaktRoute
   UeberUnsRoute: typeof UeberUnsRoute
+  AuditReportIdRoute: typeof AuditReportIdRoute
   GuidesAlttexteRoute: typeof GuidesAlttexteRoute
   GuidesKontrastRoute: typeof GuidesKontrastRoute
   GuidesTastaturNavigationRoute: typeof GuidesTastaturNavigationRoute
@@ -252,6 +277,7 @@ export interface RootRouteChildren {
   WissenBinIchBetroffenRoute: typeof WissenBinIchBetroffenRoute
   WissenFaqRoute: typeof WissenFaqRoute
   WissenWasIstBfsgRoute: typeof WissenWasIstBfsgRoute
+  AuditFullTokenRoute: typeof AuditFullTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -375,6 +401,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuidesAlttexteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/audit/$reportId': {
+      id: '/audit/$reportId'
+      path: '/audit/$reportId'
+      fullPath: '/audit/$reportId'
+      preLoaderRoute: typeof AuditReportIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/audit/full/$token': {
+      id: '/audit/full/$token'
+      path: '/audit/full/$token'
+      fullPath: '/audit/full/$token'
+      preLoaderRoute: typeof AuditFullTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -386,6 +426,7 @@ const rootRouteChildren: RootRouteChildren = {
   ImpressumRoute: ImpressumRoute,
   KontaktRoute: KontaktRoute,
   UeberUnsRoute: UeberUnsRoute,
+  AuditReportIdRoute: AuditReportIdRoute,
   GuidesAlttexteRoute: GuidesAlttexteRoute,
   GuidesKontrastRoute: GuidesKontrastRoute,
   GuidesTastaturNavigationRoute: GuidesTastaturNavigationRoute,
@@ -397,6 +438,7 @@ const rootRouteChildren: RootRouteChildren = {
   WissenBinIchBetroffenRoute: WissenBinIchBetroffenRoute,
   WissenFaqRoute: WissenFaqRoute,
   WissenWasIstBfsgRoute: WissenWasIstBfsgRoute,
+  AuditFullTokenRoute: AuditFullTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
