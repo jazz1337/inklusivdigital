@@ -51,6 +51,7 @@ export function Footer() {
               { to: "/kontakt", label: "Kontakt" },
               { to: "/impressum", label: "Impressum" },
               { to: "/datenschutz", label: "Datenschutz" },
+              { to: "/agb", label: "AGB" },
               { to: "/barrierefreiheitserklaerung", label: "Barrierefreiheitserklärung" },
             ]}
           >
