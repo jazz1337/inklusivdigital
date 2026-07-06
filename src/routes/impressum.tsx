@@ -25,7 +25,7 @@ function ImpressumPage() {
             title="Impressum"
             width="100%"
             className="block w-full rounded-xl"
-            style={{ border: "none", minHeight: "620px" }}
+            style={{ border: "none", minHeight: "420px" }}
             onLoad={(e) => {
               const iframe = e.currentTarget;
               try {
