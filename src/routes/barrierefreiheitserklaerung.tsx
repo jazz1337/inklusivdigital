@@ -14,7 +14,7 @@ function BarrierefreiheitserklaerungPage() {
   return (
     <section className="bg-background py-16">
       <div className="mx-auto max-w-2xl px-4 md:px-6">
-        <h1 className="font-display text-3xl font-bold text-foreground md:text-4xl">
+        <h1 className="font-display break-words text-3xl font-bold text-foreground md:text-4xl">
           Barrierefreiheitserklärung
         </h1>
 

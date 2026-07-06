@@ -252,7 +252,7 @@ function CodeBlock({
 }) {
   return (
     <div
-      className={`rounded-2xl border p-5 ${
+      className={`min-w-0 rounded-2xl border p-5 ${
         variant === "good" ? "border-success/30" : "border-destructive/30"
       }`}
     >

@@ -201,7 +201,7 @@ function AgbPage() {
   return (
     <section className="bg-background py-16">
       <div className="mx-auto max-w-3xl px-4 md:px-6">
-        <h1 className="font-display text-3xl font-bold text-foreground md:text-4xl">
+        <h1 className="font-display break-words text-3xl font-bold text-foreground md:text-4xl">
           Allgemeine Geschäftsbedingungen
         </h1>
         <p className="mt-3 text-sm text-muted-foreground">Stand: 06.07.2026 · Priller &amp; Paulikat GbR</p>

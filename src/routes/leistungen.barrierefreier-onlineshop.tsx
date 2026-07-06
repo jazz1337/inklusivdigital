@@ -92,7 +92,7 @@ function ShopPage() {
           title="Was wir für deinen Shop tun."
           intro="Von der Analyse bis zur fertigen Umsetzung – alles aus einer Hand oder gemeinsam mit deinem Team."
         />
-        <div className="mt-10 grid gap-5 md:grid-cols-2">
+        <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-2">
           {LEISTUNGSUMFANG.map(({ icon: Icon, title, text }) => (
             <div
               key={title}
@@ -101,7 +101,7 @@ function ShopPage() {
               <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
                 <Icon className="h-5 w-5" aria-hidden />
               </div>
-              <div>
+              <div className="min-w-0 break-words">
                 <h3 className="font-display text-lg font-bold text-foreground">{title}</h3>
                 <p className="mt-1.5 text-sm text-muted-foreground">{text}</p>
               </div>
